@@ -1,0 +1,155 @@
+{
+  "projectName": "Excel Dashboard - Healthcare Booking Analytics",
+  "projectType": "frontend",
+  "techStack": {
+    "runtime": "browser",
+    "framework": "vanilla-js",
+    "libraries": [
+      "XLSX.js@0.18.5 - Excel file parsing",
+      "Chart.js@4.4.1 - Data visualization",
+      "chartjs-plugin-datalabels@2.2.0 - Chart labels",
+      "SortableJS@1.15.0 - Drag-and-drop",
+      "FontAwesome@6.4.0 - Icons",
+      "Google Fonts Inter - Typography"
+    ],
+    "language": "JavaScript (ES6+)",
+    "styling": "CSS Custom Properties with Dark/Light theme"
+  },
+  "architecture": {
+    "type": "Client-side SPA",
+    "pattern": "Event-driven with global state",
+    "deployment": "Static HTML file (no build step)",
+    "dataFlow": "Excel Upload → XLSX Parse → Data Cleaning → Chart Rendering"
+  },
+  "coreFeatures": [
+    {
+      "name": "Excel File Import",
+      "description": "Client-side Excel file parsing using XLSX.js with FileReader API",
+      "files": ["app.js:63-78"],
+      "critical": true
+    },
+    {
+      "name": "Data Processing Pipeline",
+      "description": "Transforms Excel data: parses revenue (£XXX.XX → float), dates (DD/MM/YYYY → Date), normalizes fields",
+      "files": ["app.js:80-116"],
+      "critical": true
+    },
+    {
+      "name": "Interactive Charts",
+      "description": "12 Chart.js visualizations including revenue, demographics, status, regions, products",
+      "files": ["app.js:138-242", "index.html"],
+      "critical": true
+    },
+    {
+      "name": "Presentation Mode",
+      "description": "Fullscreen slide show with Internal/Client modes. Client mode excludes financial charts.",
+      "files": ["app.js:272-345"],
+      "critical": true
+    },
+    {
+      "name": "Financial Data Sanitization",
+      "description": "Secure client export that strips all financial fields (totals, revenue, price, cost, etc.)",
+      "files": ["app.js:349-407"],
+      "critical": true,
+      "security": true
+    },
+    {
+      "name": "KPI Dashboard",
+      "description": "Displays total revenue, booking count, and aggregated metrics",
+      "files": ["app.js:118-136"],
+      "critical": false
+    },
+    {
+      "name": "Theme System",
+      "description": "Dark/Light theme toggle with compact/spacious layout modes",
+      "files": ["index.html:23-120"],
+      "critical": false
+    }
+  ],
+  "securityFeatures": [
+    {
+      "name": "Financial Data Sanitization",
+      "description": "Removes sensitive keywords from exported reports",
+      "implementation": "Whitelist-based field deletion with case-insensitive matching",
+      "sensitiveKeywords": ["totals", "revenue", "price", "cost", "invoice_amount", "amount", "fee", "charge"],
+      "files": ["app.js:349-407"]
+    },
+    {
+      "name": "Client Mode Chart Filtering",
+      "description": "Excludes revenue charts in client presentation mode",
+      "excludedCharts": ["chartRevenueByLocation", "chartRevByMonth", "chartProductPaymentRatio"],
+      "files": ["app.js:297-303"]
+    }
+  ],
+  "dataSchema": {
+    "inputFields": [
+      "date (DD/MM/YYYY)",
+      "status (Booked/Completed/Cancelled)",
+      "first_name",
+      "last_name",
+      "totals (£XXX.XX)",
+      "Age",
+      "Region",
+      "Corporate Or Self Pay",
+      "product_code"
+    ],
+    "transformedFields": [
+      "_revenue (float)",
+      "_date (Date object)",
+      "_age (integer)",
+      "_region (string)",
+      "_status (string)",
+      "_type (string)"
+    ]
+  },
+  "chartIds": [
+    "chartSelfPayOrigin",
+    "chartAgeProduct",
+    "chartStackedProdLocation",
+    "chartRevenueByLocation",
+    "chartProductDistribution",
+    "chartSexDistribution",
+    "chartProcessStatus",
+    "chartBookingType",
+    "chartProductPaymentRatio",
+    "chartTopClients",
+    "chartTopPostcodes",
+    "chartRevByMonth"
+  ],
+  "testingUtilities": [
+    "verify_security.py - Python sanitization validator",
+    "verify_security.ps1 - PowerShell sanitization validator",
+    "inspect_excel.py - Excel file inspector",
+    "extract_sample.ps1 - Sample data extractor"
+  ],
+  "keyFiles": [
+    {
+      "path": "index.html",
+      "purpose": "Main dashboard UI with embedded CSS and chart canvases",
+      "size": "~95KB",
+      "critical": true
+    },
+    {
+      "path": "app.js",
+      "purpose": "Application logic - data processing, charts, presentation, export",
+      "lines": 408,
+      "critical": true
+    },
+    {
+      "path": "Anonymised Booking Dashboard.xlsx",
+      "purpose": "Source data file",
+      "critical": false
+    },
+    {
+      "path": "sample_data.json",
+      "purpose": "Test data",
+      "critical": false
+    }
+  ],
+  "browserRequirements": [
+    "ES6+ JavaScript support",
+    "FileReader API",
+    "Canvas 2D context",
+    "CSS custom properties"
+  ]
+}

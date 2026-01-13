@@ -1,0 +1,2607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script type='text/javascript'
+    src='https://files.oaiusercontent.com/IGwwTO2i8qF7UwA2bDru-uXDd-wEh_50ORL1DFY4J3-UDlLcKDEgME3C0uz9Mw0hjG3CK6YKViXcfXnVmVZd7Q=='></script>
+  <script type='text/javascript'
+    src='https://files09.oaiusercontent.com/MwFEYNF1026xW-r24X-6fvB18MODZDWPObD1E9lFp14Z0rVzEYtEFqYOBkXk119RgrxFcjKN85Dp3p5lqkr8dw=='></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FHM Excel → HTML Dashboard (v10 + Cumulative + Client & Postcodes)</title>
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Dark Mode is the DEFAULT (no .light class) */
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --surface-hover: #334155;
+
+      --text-main: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #64748b;
+
+      --border: #334155;
+
+      /* Brand Color */
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --primary-subtle: rgba(14, 165, 233, 0.15);
+      --primary-text: #7dd3fc;
+
+      /* Shadows (disabled in dark mode) */
+      --shadow-sm: none;
+      --shadow-md: none;
+      --shadow-lg: none;
+
+      --chart-h: 320px;
+      --header-height: 72px;
+      --radius: 12px;
+      --gap: 24px;
+    }
+
+    /* Light Mode Override */
+    body.light {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --surface-hover: #f1f5f9;
+
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+
+      --border: #e2e8f0;
+
+      --primary-subtle: #e0f2fe;
+      --primary-text: #0c4a6e;
+
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    body.spacious {
+      --gap: 32px;
+      --chart-h: 420px;
+    }
+
+    * {
+      box-sizing: border-box;
+      outline-color: var(--primary);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      line-height: 1.5;
+    }
+
+    /* --- Typography --- */
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .sub {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* --- Header --- */
+    header {
+      height: var(--header-height);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    body.light header {
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-area img {
+      height: 42px;
+      width: auto;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      padding-right: 1rem;
+      margin-right: 0.5rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .group:last-child {
+      border-right: none;
+      padding-right: 0;
+      margin-right: 0;
+    }
+
+    /* --- Form Elements --- */
+    input[type="file"]::file-selector-button {
+      display: none;
+    }
+
+    input[type="file"] {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      max-width: 280px;
+      flex-shrink: 0;
+      min-width: 200px;
+    }
+
+    button,
+    .btn {
+      appearance: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
+      border-color: var(--text-muted);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn[aria-pressed="true"],
+    .btn.active {
+      background: var(--primary-subtle);
+      border-color: var(--primary);
+      color: var(--primary-text);
+      box-shadow: none;
+    }
+
+    /* Dark mode active state adjustments */
+    body.dark .btn[aria-pressed="true"] {
+      background: rgba(14, 165, 233, 0.2);
+      color: #38bdf8;
+    }
+
+    select,
+    input[type="text"],
+    input[type="date"] {
+      appearance: none;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-family: inherit;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      transition: border-color 0.2s;
+    }
+
+    input[type="date"] {
+      padding-right: 0.75rem;
+    }
+
+    /* remove bg icon padding for date */
+
+    select:hover,
+    input:hover {
+      border-color: var(--text-muted);
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--primary);
+      outline: 2px solid var(--primary-subtle);
+    }
+
+    /* --- Main Layout --- */
+    main {
+      padding: 2rem;
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    /* --- Cards --- */
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: var(--shadow-md);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .card-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      border-radius: 4px;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover .drag-handle {
+      opacity: 1;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    /* --- KPIs --- */
+    .kpis {
+      grid-column: 1/-1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+      .kpis {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .kpis {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--primary);
+    }
+
+    .kpi-content {
+      z-index: 1;
+    }
+
+    .kpi .label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .kpi .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .kpi .icon {
+      font-size: 2.5rem;
+      color: var(--primary);
+      /* fallback */
+      opacity: 0.15;
+      position: absolute;
+      right: 1.5rem;
+      bottom: 1rem;
+      pointer-events: none;
+    }
+
+    /* --- Filters --- */
+    .filters {
+      grid-column: 1/-1;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      align-items: end;
+      padding: 2rem;
+    }
+
+    .filters label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .filters .field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filters select,
+    .filters input {
+      width: 100%;
+    }
+
+    .filters .hint {
+      grid-column: 1/-1;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* --- Charts Layout --- */
+    .charts {
+      grid-column: 1/-1;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--gap);
+    }
+
+    /* Default (Compact mode): all charts 2 per row */
+    .chart-card {
+      grid-column: span 6;
+    }
+
+    /* Spacious mode: non-pie charts full width (1 per row) */
+    body.spacious .chart-card {
+      grid-column: span 12;
+    }
+
+    .chart-card.long {
+      grid-column: span 12;
+    }
+
+    @media (max-width: 1100px) {
+      .chart-card {
+        grid-column: span 12;
+      }
+    }
+
+    .chart-frame {
+      width: 100%;
+      height: var(--chart-h);
+      position: relative;
+    }
+
+    /* Pie Grid: Always 2 per row (even in spacious mode) */
+    .pie-grid {
+      grid-column: 1/-1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gap);
+    }
+
+    .pie-grid .chart-card {
+      grid-column: auto !important;
+    }
+
+    @media (max-width: 900px) {
+      .pie-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* --- Table Styles --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: var(--surface-hover);
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* --- Footer --- */
+    .footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    /* --- Presentation Overlay --- */
+    #presentationOverlay {
+      background: var(--bg) !important;
+    }
+
+    /* --- Modal --- */
+    dialog {
+      background: var(--panel);
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    }
+
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+    }
+
+    /* --- Printing --- */
+    @media print {
+      body {
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .no-print,
+      header,
+      .drag-handle {
+        display: none !important;
+      }
+
+      .card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        break-inside: avoid;
+      }
+    }
+
+    /* --- Drag & Drop --- */
+    .arranging .drag-handle {
+      background: var(--surface-hover);
+      opacity: 1;
+      color: var(--primary);
+    }
+  </style>
+</head>
+
+<body class="spacious">
+  <header>
+    <div>
+      <img src="logo.png" alt="Circle Health Group" style="height: 50px;">
+    </div>
+    <div class="uploader toolbar">
+      <!-- Data Actions Group -->
+      <div class="group"
+        style="display:flex; gap:8px; border-right:1px solid var(--border); padding-right:12px; margin-right:4px;">
+        <input type="file" id="fileInput" accept=".xlsx,.xls" title="Bookings Data" />
+        <span style="font-size:.85rem;color:var(--muted); display:flex; align-items:center;">Recalls:</span>
+        <input type="file" id="recallInput" accept=".xlsx,.xls" title="Recalls/Invites Data" />
+        <select id="sheetSelect" title="Pick sheet" style="max-width:120px;"></select>
+      </div>
+
+      <!-- View Controls Group -->
+      <div class="group" style="display:flex; gap:8px; align-items:center;">
+        <select id="layoutMode" title="Layout">
+          <option value="compact">Compact</option>
+          <option value="spacious" selected>Spacious</option>
+        </select>
+        <select id="dpiScale" title="Scale">
+          <option value="1">1x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+        </select>
+        <select id="themeSelect" title="Theme">
+          <option value="light">Light</option>
+          <option value="dark" selected>Dark</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="group" style="display:flex; gap:8px;">
+        <button id="arrangeBtn" class="btn" title="Arrange"><i
+            class="fa-solid fa-arrows-up-down-left-right"></i></button>
+        <button id="loadBtn" class="btn" title="Reload"><i class="fa-solid fa-rotate-right"></i></button>
+        <button id="exportBtn" class="btn" title="Export Data" type="button"><i
+            class="fa-solid fa-download"></i></button>
+        <button id="exportReportBtn" class="btn" title="Export Report" type="button"><i
+            class="fa-solid fa-file-pdf"></i></button>
+        <button id="presentBtn" class="btn" title="Presentation Mode" type="button"><i
+            class="fa-solid fa-tv"></i></button>
+      </div>
+      <!-- Hidden/Secondary buttons could go in a menu, but for now we simplify by icons -->
+      <button id="resetLayoutBtn" class="btn" style="display:none;">Reset</button>
+      <button id="exportFilteredBtn" class="btn" style="display:none;">Exp Filtered</button>
+    </div>
+  </header>
+
+  <!-- Presentation Overlay -->
+  <div id="presentationOverlay"
+    style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg); z-index:1000; flex-direction:column;">
+    <!-- Presentation Header -->
+    <div
+      style="padding:16px 24px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); background:var(--panel);">
+      <div style="font-weight:700; font-size:1.2rem;" id="slideTitle">Presentation</div>
+      <div style="display:flex; gap:12px;">
+        <button id="prevSlideBtn" class="btn"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+        <span id="slideCounter"
+          style="display:flex; align-items:center; font-variant-numeric:tabular-nums; color:var(--muted);">1 / 5</span>
+        <button id="nextSlideBtn" class="btn">Next <i class="fa-solid fa-chevron-right"></i></button>
+        <div style="width:1px; background:var(--border); margin:0 8px;"></div>
+        <button id="exitPresentBtn" class="btn">Exit</button>
+      </div>
+    </div>
+
+    <!-- Slide Content -->
+    <div id="slideContainer"
+      style="flex:1; padding:40px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+      <!-- Chart canvas will be moved here temporarily -->
+      <div id="activeSlideFrame" style="width:90%; height:80%; position:relative;"></div>
+    </div>
+  </div>
+
+  <!-- Mode Selection Modal -->
+  <dialog id="modeDialog"
+    style="border:none; border-radius:12px; padding:0; box-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1); max-width:400px; width:90%;">
+    <div style="padding:24px;">
+      <h3 style="margin-top:0; margin-bottom:8px; font-size:1.25rem;">Start Presentation</h3>
+      <p style="color:var(--muted); margin-bottom:24px;">Select a mode for this presentation.</p>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <button class="btn" id="startInternalBtn"
+          style="text-align:left; padding:16px; display:flex; align-items:center; gap:12px;">
+          <div
+            style="background:#e0f2fe; color:#0284c7; width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <div>
+            <div style="font-weight:600;">Internal Report</div>
+            <div style="font-size:0.85rem; color:var(--muted);">Includes financial data & revenue charts</div>
+          </div>
+        </button>
+
+        <button class="btn" id="startClientBtn"
+          style="text-align:left; padding:16px; display:flex; align-items:center; gap:12px;">
+          <div
+            style="background:#dcfce7; color:#16a34a; width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <div>
+            <div style="font-weight:600;">Client Report</div>
+            <div style="font-size:0.85rem; color:var(--muted);">Excludes all financial data</div>
+          </div>
+        </button>
+      </div>
+    </div>
+    <div
+      style="background:#f8fafc; padding:12px 24px; display:flex; justify-content:flex-end; border-top:1px solid var(--border);">
+      <button class="btn" onclick="document.getElementById('modeDialog').close()">Cancel</button>
+    </div>
+  </dialog>
+
+  <main>
+    <section class="grid">
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Total Bookings</div>
+            <div class="value" id="kpiBookings">—</div>
+          </div>
+          <i class="fa-solid fa-calendar-check icon"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Total Revenue</div>
+            <div class="value" id="kpiRevenue">—</div>
+          </div>
+          <i class="fa-solid fa-sterling-sign icon"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Avg Revenue / Booking</div>
+            <div class="value" id="kpiARPU">—</div>
+          </div>
+          <i class="fa-solid fa-chart-line icon"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Unique Locations</div>
+            <div class="value" id="kpiLocations">—</div>
+          </div>
+          <i class="fa-solid fa-location-dot icon"></i>
+        </div>
+
+        <!-- NEW KPIs -->
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Corporate</div>
+            <div class="value" id="kpiCorp">—</div>
+          </div>
+          <i class="fa-solid fa-building icon"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Self Pay</div>
+            <div class="value" id="kpiSelf">—</div>
+          </div>
+          <i class="fa-solid fa-user icon"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Corporate Flex</div>
+            <div class="value" id="kpiFlex">—</div>
+          </div>
+          <i class="fa-solid fa-briefcase icon"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
+            <div class="label">Total Recalls Sent</div>
+            <div class="value" id="kpiRecalls">—</div>
+          </div>
+          <i class="fa-solid fa-paper-plane icon"></i>
+        </div>
+      </div>
+
+      <div class="filters card">
+        <div class="field wide">
+          <label>Location</label>
+          <select id="filterLocation">
+            <option value="">All Locations</option>
+          </select>
+        </div>
+
+        <div class="field wide">
+          <label>Status</label>
+          <select id="filterStatus">
+            <option value="">All Statuses</option>
+          </select>
+        </div>
+
+        <!-- Client (Prefix) -->
+        <div class="field wide">
+          <label>Client (Prefix)</label>
+          <select id="filterClient">
+            <option value="">All Clients</option>
+          </select>
+        </div>
+
+        <!-- NEW: Payment Type Filter -->
+        <div class="field wide">
+          <label>Payment Type</label>
+          <select id="filterPaymentType">
+            <option value="">All Payment Types</option>
+          </select>
+        </div>
+
+        <div class="field mid">
+          <label>Date Field</label>
+          <select id="dateField">
+            <option value="date">Appointment Date</option>
+            <option value="reserved_at">Reserved Date</option>
+          </select>
+        </div>
+
+        <div class="field mid">
+          <label>Start Date</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="field mid">
+          <label>End Date</label>
+          <input type="date" id="endDate" />
+        </div>
+
+        <div class="field short">
+          <button id="applyFilters" class="btn">Apply</button>
+        </div>
+
+        <div class="hint" style="grid-column:1/-1">
+          Required: <code>date</code>, <code>totals</code>, <code>location</code>, <code>status</code>.
+          Optional: <code>reserved_at</code>, <code>product_code</code>, <code>age</code>, <code>sex_at_birth</code>,
+          <code>process_status</code>, <code>Prefix</code>, <code>single_use_invitation_code</code>,
+          <code>postcode_regions</code>.
+        </div>
+      </div>
+
+      <!-- Cumulative Product Mix Comparison -->
+      <div class="card" id="cumulativeCompareCard" style="grid-column:1/-1">
+        <div class="card-header">
+          <h3 style="margin:0">Cumulative Product Mix Comparison</h3>
+        </div>
+        <div class="row" style="margin-bottom:8px">
+          <div>
+            <label>Comparison Type</label>
+            <select id="cmpType">
+              <option value="mom">Month vs Month</option>
+              <option value="yoy">Year-over-Year (same month)</option>
+              <option value="weeks">Weeks in a Month (W1–W4)</option>
+              <!-- NEW -->
+              <option value="yoy_full">Year-over-Year — Full Year</option>
+            </select>
+          </div>
+          <div id="cmpMomA">
+            <label>Period A (Month)</label>
+            <select id="momA"></select>
+          </div>
+          <div id="cmpMomB">
+            <label>Period B (Month)</label>
+            <select id="momB"></select>
+          </div>
+          <div id="cmpYoYMonth" style="display:none">
+            <label>Month</label>
+            <select id="yoyMonth"></select>
+          </div>
+          <div id="cmpYoYYearA" style="display:none">
+            <label>Year A</label>
+            <select id="yoyA"></select>
+          </div>
+          <div id="cmpYoYYearB" style="display:none">
+            <label>Year B</label>
+            <select id="yoyB"></select>
+          </div>
+          <div id="cmpWeeksMonth" style="display:none">
+            <label>Month</label>
+            <select id="weeksMonth"></select>
+          </div>
+          <div>
+            <label>Metric</label>
+            <select id="cmpMetric">
+              <option value="count">Count</option>
+              <option value="revenue">Revenue (sum of totals)</option>
+            </select>
+          </div>
+          <div style="align-self:flex-end">
+            <button id="buildCmp" class="btn">Build Comparison</button>
+          </div>
+        </div>
+        <div class="chart-frame"><canvas id="chartCumulativeCompare"></canvas></div>
+        <div class="hint" style="margin-top:6px">Location/Status/Client filters apply. Date range inputs are ignored
+          here.</div>
+      </div>
+
+      <div id="chartsGrid" class="charts">
+        <div class="chart-card card" data-key="selfPayOrigin">
+          <div class="card-header">
+            <h3 style="margin:0">Self Pay Origin</h3><span class="drag-handle" title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartSelfPayOrigin"></canvas></div>
+        </div>
+
+        <div class="chart-card card" data-key="ageByProduct">
+          <div class="card-header">
+            <h3 style="margin:0">Age Distribution by Product</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartAgeProduct"></canvas></div>
+        </div>
+
+        <div class="chart-card card" data-key="stackedProdLoc">
+          <div class="card-header">
+            <h3 style="margin:0">Count by Product & Location (stacked)</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartStackedProdLocation"></canvas></div>
+        </div>
+
+        <div class="chart-card card" data-key="revenueByLoc">
+          <div class="card-header">
+            <h3 style="margin:0">Sum of Totals by Location</h3><span class="drag-handle" title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartRevenueByLocation"></canvas></div>
+        </div>
+
+        <!-- Pie Charts Grid (2x2) -->
+        <div class="pie-grid" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="chart-card card" data-key="productMix">
+            <div class="card-header">
+              <h3 style="margin:0">Product Mix (Count)</h3><span class="drag-handle" title="Drag to move">⋮⋮</span>
+            </div>
+            <div class="chart-frame"><canvas id="chartProductDistribution"></canvas></div>
+          </div>
+
+          <div class="chart-card card" data-key="sexDist">
+            <div class="card-header">
+              <h3 style="margin:0">Sex at Birth (Count)</h3><span class="drag-handle" title="Drag to move">⋮⋮</span>
+            </div>
+            <div class="chart-frame"><canvas id="chartSexDistribution"></canvas></div>
+          </div>
+
+          <div class="chart-card card" data-key="procStatus">
+            <div class="card-header">
+              <h3 style="margin:0">Process Status (Count)</h3><span class="drag-handle" title="Drag to move">⋮⋮</span>
+            </div>
+            <div class="chart-frame"><canvas id="chartProcessStatus"></canvas></div>
+          </div>
+
+          <div class="chart-card card" data-key="bookingType">
+            <div class="card-header">
+              <h3 style="margin:0">New vs Reschedule (Count)</h3><span class="drag-handle"
+                title="Drag to move">⋮⋮</span>
+            </div>
+            <div class="chart-frame"><canvas id="chartBookingType"></canvas></div>
+          </div>
+        </div>
+
+        <!-- NEW: Product Payment Ratio Chart (Moved) -->
+        <div class="chart-card long card" data-key="productPaymentRatio">
+          <div class="card-header">
+            <h3 style="margin:0">Payment Ratio by Product (100% Stacked)</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartProductPaymentRatio"></canvas></div>
+        </div>
+
+        <div class="chart-card card" data-key="topClients">
+          <div class="card-header">
+            <h3 style="margin:0">Top 25 Clients by Count (Prefix)</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartTopClients"></canvas></div>
+        </div>
+
+        <!-- NEW: Top Postcode Regions -->
+        <div class="chart-card card" data-key="topPostcodes">
+          <div class="card-header">
+            <h3 style="margin:0">Top 25 Postcode Regions (Count)</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartTopPostcodes"></canvas></div>
+        </div>
+
+        <div class="chart-card long card" data-key="revByMonth">
+          <div class="card-header">
+            <h3 style="margin:0">Revenue by Month</h3><span class="drag-handle" title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartRevByMonth"></canvas></div>
+        </div>
+        <!-- NEW: Recall and Invites Analysis Charts -->
+        <div class="chart-card card" data-key="recallInviteCombo">
+          <div class="card-header">
+            <h3 style="margin:0">Recalls &amp; Invites vs Booking Increase</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartRecallInviteCombo"></canvas></div>
+        </div>
+        <div class="chart-card card" data-key="recallsTrend">
+          <div class="card-header">
+            <h3 style="margin:0">Bookings Around Recall Date</h3><span class="drag-handle"
+              title="Drag to move">⋮⋮</span>
+          </div>
+          <div class="chart-frame"><canvas id="chartRecallsTrend"></canvas></div>
+        </div>
+
+
+      </div>
+
+      <div class="table-card card">
+        <div class="card-header">
+          <h3 style="margin:0">Latest Records</h3>
+        </div>
+        <div class="hint" style="margin-bottom:8px">First 500 rows after filters</div>
+        <table id="dataTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="footer">Tip: Click <b>Arrange</b> to enable drag mode. Your layout is saved to your browser
+      (localStorage). Reset anytime.</div>
+    <!-- Hidden container for embedded JSON data. Holds workbook or filtered data -->
+    <script id="embeddedData" type="application/json" style="display:none;"></script>
+  </main>
+
+  <script>
+    // Register plugin
+    Chart.register(ChartDataLabels);
+
+    // Globals
+    let workbook, rawRows = [], viewRows = [];
+    let charts = {};
+    let scale = 2; // HiDPI
+    let sortable = null;
+    // Presentation state (defined at top to avoid TDZ errors)
+    let currentSlide = 0;
+    let slides = [];
+    let activePresentChart = null;
+    // Map of recall data keyed by prefix. Populated when a recall workbook is loaded.
+    // Each entry has the structure { count: Number, invites: Number, date: 'YYYY-MM-DD' }.
+    let recallMap = {};
+
+    const LAYOUT_KEY = "fhm_chart_order_v1";
+
+    const fmtMoney = n => (n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtInt = n => (n ?? 0).toLocaleString();
+    const toLower = s => (s || "").toString().trim().toLowerCase();
+    const hasCols = (obj, cols) => cols.every(c => Object.keys(obj).map(k => toLower(k)).includes(toLower(c)));
+    const coalesce = (v, fallback = "(blank)") => (v == null || v === "") ? fallback : v;
+
+    function parseExcelDate(v) {
+      if (v == null || v === "") return null;
+      if (v instanceof Date) return v;
+      if (typeof v === "number") {
+        const o = XLSX.SSF.parse_date_code(v);
+        if (!o) return null;
+        return new Date(o.y, (o.m - 1), o.d);
+      }
+      if (typeof v === "string") {
+        const dmy = v.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+        if (dmy) { let d = +dmy[1], m = +dmy[2], y = +dmy[3]; if (y < 100) y += 2000; return new Date(y, m - 1, d); }
+        const ymd = v.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (ymd) { let y = +ymd[1], m = +ymd[2], d = +ymd[3]; return new Date(y, m - 1, d); }
+        const t = Date.parse(v); if (!isNaN(t)) return new Date(t);
+      }
+      return null;
+    }
+    const monthKey = dt => dt ? dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") : null;
+    const monthLabel = dt => dt.toLocaleString(undefined, { month: "short", year: "numeric" });
+    const monthKeyLabel = k => { const [y, m] = k.split("-").map(Number); return new Date(y, m - 1, 1).toLocaleString(undefined, { month: "short", year: "numeric" }); };
+
+    function detectDataSheet(wb) {
+      const req = ["date", "totals", "location", "status"];
+      const goodNames = wb.SheetNames.filter(n => /jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i.test(n));
+      const names = [...goodNames, ...wb.SheetNames];
+      for (const name of names) {
+        const ws = wb.Sheets[name];
+        if (!ws) continue;
+        const rows = XLSX.utils.sheet_to_json(ws, { defval: null });
+        if (rows.length && hasCols(rows[0], req)) return name;
+      }
+      return wb.SheetNames[0];
+    }
+
+    function inferColumns(row) {
+      const cols = {};
+      const keys = Object.keys(row);
+      for (const k of keys) {
+        const lk = toLower(k);
+        if (lk === "date") cols.date = k;
+        if (lk === "reserved_at") cols.reserved_at = k;
+        if (lk === "totals") cols.totals = k;
+        if (lk === "location") cols.location = k;
+        if (lk === "status") cols.status = k;
+        if (lk === "product_code") cols.product_code = k;
+        if (lk === "sex_at_birth") cols.sex_at_birth = k;
+        if (lk === "process_status") cols.process_status = k;
+        if (lk === "prefix") cols.Prefix = k;
+        if (lk === "single_use_invitation_code") cols.suic = k;
+        if (lk === "age") cols.age = k;
+        if (lk === "postcode_regions") cols.postcode_regions = k;
+        if (lk.includes("corporate") && lk.includes("self")) cols.corp_or_self = k;
+      }
+      // fuzzy fallbacks
+      if (!cols.postcode_regions) {
+        const m = keys.find(k => /post\s*code.*region|postcode[_\s-]*regions?/i.test(k));
+        if (m) cols.postcode_regions = m;
+      }
+      if (!cols.suic) {
+        const m = keys.find(k => /single.*invite|invitation.*code/i.test(k));
+        if (m) cols.suic = m;
+      }
+      if (!cols.age) {
+        const ageLike = keys.find(k => /(^|_|\s)age(s)?($|_|\s)/i.test(k));
+        if (ageLike) cols.age = ageLike;
+      }
+      return cols;
+    }
+
+    function parseAge(v) {
+      if (v == null || v === "") return null;
+      const n = parseFloat(String(v).toString().replace(/[^0-9.\-]/g, ""));
+      return isNaN(n) ? null : n;
+    }
+
+    // Age bands
+    const ageBandsOrder = ["<10 / blank", "10–19", "20–29", "30–39", "40–49", "50–59", "60–69", "70–79", "80–89", "90–100", ">100"];
+    function ageBand(age) {
+      if (age == null || age < 10) return "<10 / blank";
+      if (age >= 10 && age <= 19) return "10–19";
+      if (age >= 20 && age <= 29) return "20–29";
+      if (age >= 30 && age <= 39) return "30–39";
+      if (age >= 40 && age <= 49) return "40–49";
+      if (age >= 50 && age <= 59) return "50–59";
+      if (age >= 60 && age <= 69) return "60–69";
+      if (age >= 70 && age <= 79) return "70–79";
+      if (age >= 80 && age <= 89) return "80–89";
+      if (age >= 90 && age <= 100) return "90–100";
+      return ">100";
+    }
+
+    // Datalabel configs
+    // Datalabel configs
+    const dlCountDark = {
+      color: "#000000", // Black for max contrast
+      font: { weight: "bold" },
+      formatter: (v) => v ? v.toLocaleString() : "",
+      anchor: "end",
+      align: "top",
+      offset: 4,
+      clamp: true
+    };
+
+    const dlCurrency = {
+      color: "#000000",
+      font: { weight: "bold" },
+      formatter: (v) => "£" + (v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }),
+      anchor: "end",
+      align: "top",
+      offset: 4,
+      clamp: true
+    };
+
+    const dlPie = {
+      color: (ctx) => {
+        // Dynamic text color based on background brightness
+        const bg = ctx.dataset.backgroundColor[ctx.dataIndex] || "#000000";
+        // Simple hex to rgb conversion
+        const r = parseInt(bg.slice(1, 3), 16);
+        const g = parseInt(bg.slice(3, 5), 16);
+        const b = parseInt(bg.slice(5, 7), 16);
+        // Perceived brightness (YIQ)
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return yiq >= 128 ? "#0f172a" : "#ffffff"; // Dark text for light bg, White for dark
+      },
+      font: { weight: "bold" },
+      formatter: (v, ctx) => {
+        const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0) || 1;
+        const pct = Math.round((v / total) * 100);
+        // Hide if less than 5% to prevent overlap
+        if (pct < 5) return "";
+        return v ? `${v.toLocaleString()} (${pct}%)` : "";
+      },
+      anchor: "center",
+      align: "center",
+      clamp: true
+    };
+
+    function buildChart(ctx, cfg) {
+      const local = Object.assign({}, cfg, { options: Object.assign({}, cfg.options || {}, { responsive: true, maintainAspectRatio: false, devicePixelRatio: Math.max(window.devicePixelRatio, scale) }) });
+      return new Chart(ctx, local);
+    }
+
+    function applyFiltersToRows() {
+      const locSel = document.getElementById("filterLocation").value;
+      const stSel = document.getElementById("filterStatus").value;
+      const cliSel = (document.getElementById("filterClient") || {}).value || "";
+      const paySel = (document.getElementById("filterPaymentType") || {}).value || "";
+      const df = document.getElementById("dateField").value;
+      const sdVal = document.getElementById("startDate").value;
+      const edVal = document.getElementById("endDate").value;
+      const sd = sdVal ? new Date(sdVal + "T00:00:00") : null;
+      const ed = edVal ? new Date(edVal + "T23:59:59") : null;
+
+      viewRows = rawRows.filter(r => {
+        if (locSel && r.location !== locSel) return false;
+        if (stSel && r.status !== stSel) return false;
+        if (cliSel && r.Prefix !== cliSel) return false;
+        if (paySel && r.corp_or_self !== paySel) return false;
+        const d = r[df];
+        if (sd && (!d || d < sd)) return false;
+        if (ed && (!d || d > ed)) return false;
+        return true;
+      });
+    }
+
+    function updateKPIs() {
+      const totalBookings = viewRows.length;
+      const totalRevenue = viewRows.reduce((s, r) => s + (r.totals || 0), 0);
+      const avgRevenue = totalBookings ? (totalRevenue / totalBookings) : 0;
+      const uniqueLoc = new Set(viewRows.map(r => r.location)).size;
+
+      // Payment Type Counts
+      const corpCount = viewRows.filter(r => (r.corp_or_self || "").toLowerCase() === "corporate").length;
+      const selfCount = viewRows.filter(r => (r.corp_or_self || "").toLowerCase() === "self pay").length;
+      const flexCount = viewRows.filter(r => (r.corp_or_self || "").toLowerCase() === "corporate flex").length;
+
+      // Total Recalls (from recallMap, independent of filters usually, but let's sum all loaded recalls)
+      // recallMap is { prefix: { count, invites, date } }
+      const totalRecalls = Object.values(recallMap).reduce((s, v) => s + (v.count || 0), 0);
+
+      document.getElementById("kpiBookings").textContent = fmtInt(totalBookings);
+      document.getElementById("kpiRevenue").textContent = "£" + fmtMoney(totalRevenue);
+      document.getElementById("kpiARPU").textContent = "£" + fmtMoney(avgRevenue);
+      document.getElementById("kpiLocations").textContent = fmtInt(uniqueLoc);
+
+      document.getElementById("kpiCorp").textContent = fmtInt(corpCount);
+      document.getElementById("kpiSelf").textContent = fmtInt(selfCount);
+      document.getElementById("kpiFlex").textContent = fmtInt(flexCount);
+      document.getElementById("kpiRecalls").textContent = fmtInt(totalRecalls);
+    }
+
+    function groupBy(arr, keyFn) {
+      const m = new Map();
+      for (const x of arr) {
+        const k = keyFn(x);
+        if (!m.has(k)) m.set(k, []);
+        m.get(k).push(x);
+      }
+      return m;
+    }
+
+    function makeSelfPayOriginCounts(rows) {
+      const rules = [
+        { label: "Self Pay (M01) Website", pattern: /M01\s*Website/i },
+        { label: "Self Pay (M01) Phone", pattern: /M01\s*phone/i },
+        { label: "AXA Phone", pattern: /AXAMEMBEROFFER/i },
+        { label: "AXA Website", pattern: /AXAONLINE/i },
+        { label: "WPA Phone", pattern: /U81\s*phone/i },
+        { label: "WPA Website", pattern: /U81\s*Website/i },
+        { label: "TY2 Phone", pattern: /TY2\s*PHONE/i },
+        { label: "TY2 Website", pattern: /TY2\s*WEBSITE/i },
+        { label: "Aviva Website", pattern: /U22\s*Website/i },
+        { label: "Aviva Phone", pattern: /U22\s*Phone/i },
+      ];
+      const counts = rules.map(r => ({ label: r.label, n: 0 }));
+      for (const r of rows) {
+        const v = (r.single_use_invitation_code || "").toString();
+        for (let i = 0; i < rules.length; i++) {
+          if (rules[i].pattern.test(v)) { counts[i].n++; }
+        }
+      }
+      counts.sort((a, b) => b.n - a.n);
+      return counts;
+    }
+
+    function updateCharts() {
+      const getFontColor = () => document.body.classList.contains("dark") ? "#e5e7eb" : "#000000";
+      // Update datalabel color dynamically
+      dlCountDark.color = getFontColor();
+      dlCurrency.color = getFontColor();
+      // dlPie handles its own contrast
+
+      // Enforce global default color (fixes legends, titles, etc.)
+      Chart.defaults.color = getFontColor();
+
+      // Complementary Palette for Contrast
+      const brandBlue = "#009fe3";
+      const accentOrange = "#f59e0b";
+      const accentTeal = "#10b981";
+      const accentPurple = "#8b5cf6";
+      const neutralSlate = "#64748b";
+
+      const palette = [
+        brandBlue,    // Primary
+        accentOrange, // Contrast
+        accentTeal,   // Secondary
+        accentPurple, // Tertiary
+        "#ef4444",    // Red (if needed)
+        "#3b82f6",    // Blue 500
+        "#84cc16",    // Lime
+      ];
+
+      // Helper to get color by index
+      const getColor = (i) => palette[i % palette.length];
+
+      // ----- Self Pay Origin
+      const spo = makeSelfPayOriginCounts(viewRows);
+      const spoLabels = spo.map(x => x.label);
+      const spoData = spo.map(x => x.n);
+
+      // ----- Age Distribution by Product
+      const productSet = new Set(viewRows.map(r => coalesce(r.product_code, "(blank)")));
+      const preferredOrder = ["Advanced", "Advanced Plus", "Essential", "Select"];
+      const products = [...preferredOrder.filter(p => productSet.has(p)), ...[...productSet].filter(p => !preferredOrder.includes(p))];
+
+      const bandCounts = {}; // band -> product -> count
+      for (const b of ageBandsOrder) { bandCounts[b] = {}; for (const p of products) { bandCounts[b][p] = 0; } }
+      for (const r of viewRows) {
+        const band = ageBand(r.age);
+        const p = coalesce(r.product_code, "(blank)");
+        if (!bandCounts[band]) bandCounts[band] = {};
+        if (!(p in bandCounts[band])) bandCounts[band][p] = 0;
+        bandCounts[band][p] += 1;
+      }
+      const usedBands = ageBandsOrder.filter(b => Object.values(bandCounts[b]).some(v => v > 0));
+      const ageDatasets = products.map((p, i) => ({
+        label: p,
+        data: usedBands.map(b => bandCounts[b][p] || 0),
+        backgroundColor: getColor(i)
+      }));
+
+      // ----- Revenue by location
+      const byLocRevenue = Array.from(groupBy(viewRows, r => coalesce(r.location, "(blank)")).entries())
+        .map(([loc, rows]) => ({ loc, revenue: rows.reduce((s, r) => s + (r.totals || 0), 0) }))
+        .sort((a, b) => b.revenue - a.revenue);
+
+      // ----- Stacked counts by product × location
+      const locLabels = Array.from(new Set(viewRows.map(r => coalesce(r.location, "(blank)")))).sort();
+      const datasetsStacked = products.map((prod, i) => {
+        const data = locLabels.map(loc => viewRows.filter(r => coalesce(r.location, "(blank)") === loc && coalesce(r.product_code, "(blank)") === prod).length);
+        return { label: prod, data, stack: "stack1", backgroundColor: getColor(i) };
+      });
+
+      // ----- Product distribution (count)
+      const byProd = Array.from(groupBy(viewRows, r => coalesce(r.product_code, "(blank)")).entries())
+        .map(([p, rows]) => ({ p, n: rows.length }))
+        .sort((a, b) => b.n - a.n);
+
+      // ----- Sex at birth distribution
+      const bySex = Array.from(groupBy(viewRows, r => coalesce(r.sex_at_birth, "(blank)")).entries())
+        .map(([s, rows]) => ({ s, n: rows.length }))
+        .sort((a, b) => b.n - a.n);
+
+      // ----- Process status distribution
+      const byProc = Array.from(groupBy(viewRows, r => coalesce(r.process_status, "(blank)")).entries())
+        .map(([s, rows]) => ({ s, n: rows.length }))
+        .sort((a, b) => b.n - a.n);
+
+      // ----- Booking type distribution (New vs Reschedule vs Other)
+      const bookingTypeCounts = makeBookingTypeCounts(viewRows);
+      const bookingLabels = Object.keys(bookingTypeCounts);
+      const bookingData = Object.values(bookingTypeCounts);
+
+      // ----- Top clients by Prefix
+      const byClient = Array.from(groupBy(viewRows, r => coalesce(r.Prefix, "(blank)")).entries())
+        .map(([c, rows]) => ({ c, n: rows.length }))
+        .filter(x => x.c !== "(blank)")
+        .sort((a, b) => b.n - a.n)
+        .slice(0, 25);
+      const clientLabels = byClient.map(x => x.c);
+      const clientData = byClient.map(x => x.n);
+
+      // ----- NEW: Top postcode regions
+      const byPost = Array.from(groupBy(viewRows, r => coalesce(r.postcode_regions, "(blank)")).entries())
+        .map(([pc, rows]) => ({ pc, n: rows.length }))
+        .filter(x => x.pc !== "(blank)")
+        .sort((a, b) => b.n - a.n)
+        .slice(0, 25);
+      const postLabels = byPost.map(x => x.pc);
+      const postData = byPost.map(x => x.n);
+
+      // ----- Revenue by month (selected date field)
+      const df = document.getElementById("dateField").value;
+      const byMonth = Array.from(groupBy(viewRows.filter(r => r[df]), r => monthKey(r[df])).entries())
+        .map(([mk, rows]) => {
+          const dt = rows[0][df];
+          return { key: mk, label: monthLabel(dt), revenue: rows.reduce((s, r) => s + (r.totals || 0), 0), ts: dt.getTime() };
+        })
+        .sort((a, b) => a.ts - b.ts);
+      const monthLabels = byMonth.map(x => x.label);
+      const monthData = byMonth.map(x => +(x.revenue.toFixed(2)));
+
+      // Destroy old charts
+      for (const k of Object.keys(charts)) { if (charts[k]) charts[k].destroy(); }
+
+      charts.selfPayOrigin = buildChart(document.getElementById("chartSelfPayOrigin"), {
+        type: "bar",
+        data: { labels: spoLabels, datasets: [{ label: "Count", data: spoData, backgroundColor: brandBlue }] },
+        options: {
+          plugins: { legend: { display: false }, datalabels: dlCountDark },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: getFontColor() } },
+            x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 45, color: getFontColor() } }
+          }
+        }
+      });
+
+      charts.ageByProduct = buildChart(document.getElementById("chartAgeProduct"), {
+        type: "bar",
+        data: { labels: usedBands, datasets: ageDatasets },
+        options: { plugins: { legend: { position: "right" }, datalabels: dlCountDark }, scales: { y: { beginAtZero: true, ticks: { color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
+      });
+
+      charts.stacked = buildChart(document.getElementById("chartStackedProdLocation"), {
+        type: "bar",
+        data: { labels: locLabels, datasets: datasetsStacked },
+        options: { plugins: { legend: { position: "right" }, datalabels: Object.assign({}, dlCountDark, { anchor: "center", align: "center" }) }, scales: { x: { stacked: true, ticks: { color: getFontColor() } }, y: { beginAtZero: true, stacked: true, ticks: { color: getFontColor() } } } }
+      });
+
+      charts.revenueLoc = buildChart(document.getElementById("chartRevenueByLocation"), {
+        type: "bar",
+        data: { labels: byLocRevenue.map(x => x.loc), datasets: [{ label: "Total", data: byLocRevenue.map(x => x.revenue), backgroundColor: brandBlue }] },
+        options: { plugins: { legend: { display: true }, datalabels: dlCurrency }, scales: { y: { beginAtZero: true, ticks: { callback: (v) => "£" + v.toLocaleString(), color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
+      });
+
+      charts.prodDist = buildChart(document.getElementById("chartProductDistribution"), {
+        type: "pie",
+        data: { labels: byProd.map(x => x.p), datasets: [{ label: "Count", data: byProd.map(x => x.n), backgroundColor: palette }] },
+        options: { plugins: { legend: { position: "right" }, datalabels: dlPie } }
+      });
+
+      charts.sexDist = buildChart(document.getElementById("chartSexDistribution"), {
+        type: "pie",
+        data: { labels: bySex.map(x => x.s), datasets: [{ label: "Count", data: bySex.map(x => x.n), backgroundColor: [brandBlue, accentOrange, neutralSlate] }] },
+        options: { plugins: { legend: { position: "right" }, datalabels: dlPie } }
+      });
+
+      charts.procDist = buildChart(document.getElementById("chartProcessStatus"), {
+        type: "pie",
+        data: { labels: byProc.map(x => x.s), datasets: [{ label: "Count", data: byProc.map(x => x.n), backgroundColor: palette }] },
+        options: { plugins: { legend: { position: "right" }, datalabels: dlPie } }
+      });
+
+      // Create pie chart for booking types
+      charts.bookingType = buildChart(document.getElementById("chartBookingType"), {
+        type: "pie",
+        data: { labels: bookingLabels, datasets: [{ label: "Count", data: bookingData, backgroundColor: [brandBlue, accentOrange, neutralSlate] }] },
+        options: { plugins: { legend: { position: "right" }, datalabels: dlPie } }
+      });
+
+      charts.topClients = buildChart(document.getElementById("chartTopClients"), {
+        type: "bar",
+        data: { labels: clientLabels, datasets: [{ label: "Count", data: clientData, backgroundColor: brandBlue }] },
+        options: { plugins: { legend: { display: false }, datalabels: dlCountDark }, scales: { y: { beginAtZero: true, ticks: { color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
+      });
+
+      charts.topPostcodes = buildChart(document.getElementById("chartTopPostcodes"), {
+        type: "bar",
+        data: { labels: postLabels, datasets: [{ label: "Count", data: postData, backgroundColor: brandBlue }] },
+        options: { plugins: { legend: { display: false }, datalabels: dlCountDark }, scales: { y: { beginAtZero: true, ticks: { color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
+      });
+
+      charts.month = buildChart(document.getElementById("chartRevByMonth"), {
+        type: "line",
+        data: { labels: monthLabels, datasets: [{ label: "Revenue", data: monthData, tension: .25, fill: true, backgroundColor: "rgba(0, 159, 227, 0.1)", borderColor: brandBlue }] },
+        options: { plugins: { legend: { position: "bottom" }, datalabels: dlCurrency }, scales: { y: { beginAtZero: true, ticks: { color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
+      });
+
+      // ---- Recall and invites analysis charts ----
+      // Compute per-prefix booking change and aggregated trend from current view
+      const rc = computeRecallChartsData(viewRows);
+
+      // Combined Recalls & Invites vs Booking Increase chart
+      // Build a combined dataset sorted by the larger of recall/invite counts and limited to top 20 prefixes
+      const prefixStats = rc.scatter.map(pt => {
+        const inv = (recallMap[pt.prefix] && recallMap[pt.prefix].invites) || 0;
+        return { prefix: pt.prefix, recallAmount: pt.recallAmount, invites: inv, increase: pt.increase };
+      });
+      prefixStats.sort((a, b) => Math.max(b.recallAmount, b.invites) - Math.max(a.recallAmount, a.invites));
+      const topStats = prefixStats.slice(0, 20);
+      const comboLabels = topStats.map(s => s.prefix);
+      const recallSeries = topStats.map(s => s.recallAmount);
+      const invitesSeries = topStats.map(s => s.invites);
+      const increaseSeries = topStats.map(s => s.increase);
+      charts.recallInviteCombo = buildChart(document.getElementById("chartRecallInviteCombo"), {
+        type: "bar",
+        data: {
+          labels: comboLabels,
+          datasets: [
+            { type: "bar", label: "Recalls Sent", data: recallSeries, backgroundColor: "#6366f1" },
+            { type: "bar", label: "Invites Sent", data: invitesSeries, backgroundColor: "#10b981" },
+            { type: "line", label: "Booking Increase", data: increaseSeries, borderColor: "#f59e0b", backgroundColor: "#f59e0b", yAxisID: "y2", tension: 0.25, fill: false }
+          ]
+        },
+        options: {
+          plugins: {
+            legend: { position: "bottom" },
+            datalabels: { display: false }
+          },
+          scales: {
+            x: { ticks: { color: getFontColor() } },
+            y: { beginAtZero: true, title: { display: true, text: "Count", color: getFontColor() }, ticks: { color: getFontColor() } },
+            y2: { beginAtZero: true, position: "right", grid: { drawOnChartArea: false }, title: { display: true, text: "Booking Increase", color: getFontColor() }, ticks: { color: getFontColor() } }
+          }
+        }
+      });
+
+      // Bookings around recall date line chart
+      const trendDataPoints = rc.trend.days.map((d, idx) => ({ x: d, y: rc.trend.counts[idx] }));
+      charts.recallsTrend = buildChart(document.getElementById("chartRecallsTrend"), {
+        type: "line",
+        data: { datasets: [{ label: "Bookings", data: trendDataPoints, tension: .25, fill: true, backgroundColor: "rgba(0, 159, 227, 0.1)", borderColor: brandBlue }] },
+        options: {
+          plugins: {
+            legend: { position: "bottom" },
+            datalabels: { display: false }
+          },
+          scales: {
+            x: {
+              type: 'linear',
+              min: -30,
+              max: 30,
+              title: { display: true, text: "Days Relative to Recall" },
+              ticks: {
+                callback: function (value) { return value > 0 ? ('+' + value) : String(value); },
+                stepSize: 5,
+                color: getFontColor()
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "Bookings Count", color: getFontColor() },
+              ticks: { color: getFontColor() }
+            }
+          }
+        }
+      });
+
+      // ---- NEW: Product Payment Ratio Chart (100% Stacked) ----
+      // Products requested: Essential, Select, Advanced, Advanced Plus
+      const targetProducts = ["Essential", "Select", "Advanced", "Advanced Plus"];
+      const paymentTypes = ["Corporate", "Corporate Flex", "Self Pay"];
+
+      // Initialize counts
+      const payCounts = {}; // product -> type -> count
+      targetProducts.forEach(p => {
+        payCounts[p] = {};
+        paymentTypes.forEach(t => payCounts[p][t] = 0);
+      });
+
+      // Aggregate data
+      viewRows.forEach(r => {
+        const prod = coalesce(r.product_code, "").trim();
+        const type = coalesce(r.corp_or_self, "").trim(); // Use exact column name from inspection
+
+        // Match product (fuzzy match for GSK if needed, or exact)
+        let matchedProd = targetProducts.find(tp => prod.toLowerCase() === tp.toLowerCase());
+
+        // Special handling if GSK is not a product code but maybe a client prefix or something else?
+        // For now assuming it's in product_code. If not found, we ignore or check if user meant Client.
+        // If 'GSK' is a client prefix, we might need to check r.Prefix. 
+        // Let's check if the product code itself contains GSK.
+        if (!matchedProd && prod.toLowerCase().includes("gsk")) matchedProd = "GSK";
+
+        if (matchedProd && payCounts[matchedProd]) {
+          // Match type
+          let matchedType = paymentTypes.find(pt => type.toLowerCase() === pt.toLowerCase());
+          if (matchedType) {
+            payCounts[matchedProd][matchedType]++;
+          }
+        }
+      });
+
+      // Set global font
+      Chart.defaults.font.family = "'Inter', sans-serif";
+
+
+
+      // Prepare datasets
+      const payDatasets = paymentTypes.map((type, i) => {
+        // Complementary Palette for this specific chart
+        const colors = ["#009fe3", "#f59e0b", "#10b981"]; // Blue, Orange, Teal
+        return {
+          label: type,
+          data: targetProducts.map(p => {
+            const total = paymentTypes.reduce((sum, t) => sum + payCounts[p][t], 0);
+            return total ? (payCounts[p][type] / total) * 100 : 0;
+          }),
+          backgroundColor: colors[i % colors.length],
+          stack: 'stack1'
+        };
+      });
+
+      charts.productPaymentRatio = buildChart(document.getElementById("chartProductPaymentRatio"), {
+        type: "bar",
+        data: {
+          labels: targetProducts,
+          datasets: payDatasets
+        },
+        options: {
+          plugins: {
+            legend: { position: "bottom" },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return context.dataset.label + ': ' + context.raw.toFixed(1) + '%';
+                }
+              }
+            },
+            datalabels: {
+              color: '#fff',
+              formatter: (value) => value > 5 ? Math.round(value) + '%' : '', // Only show if > 5%
+              font: { weight: 'bold' }
+            }
+          },
+          scales: {
+            x: { stacked: true, ticks: { color: getFontColor() } },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: (v) => v + "%", color: getFontColor() }
+            }
+          }
+        }
+      });
+    }
+
+    function renderTable() {
+      const tbl = document.getElementById("dataTable");
+      const tbody = tbl.querySelector("tbody");
+      thead.innerHTML = ""; tbody.innerHTML = "";
+
+      if (!viewRows.length) { thead.innerHTML = "<tr><th>No data</th></tr>"; return; }
+
+      const cols = ["date", "reserved_at", "location", "status", "product_code", "age", "totals", "sex_at_birth", "process_status", "Prefix", "single_use_invitation_code", "postcode_regions"];
+      const present = cols.filter(c => viewRows.some(r => r._rawCols[c]));
+
+      const trh = document.createElement("tr");
+      for (const c of present) { const th = document.createElement("th"); th.textContent = c; trh.appendChild(th); }
+      thead.appendChild(trh);
+
+      for (const r of viewRows.slice(0, 500)) {
+        const tr = document.createElement("tr");
+        for (const c of present) {
+          const td = document.createElement("td");
+          let v = r._raw[r._rawCols[c]];
+          if (c === "totals") v = "£" + fmtMoney(+r.totals || 0);
+          if ((c === "date" || c === "reserved_at") && r[c]) v = r[c].toLocaleDateString();
+          td.textContent = v == null ? "" : v;
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    function populateFilters() {
+      const locSel = document.getElementById("filterLocation");
+      const stSel = document.getElementById("filterStatus");
+      const cliSel = document.getElementById("filterClient");
+      const paySel = document.getElementById("filterPaymentType");
+
+      locSel.innerHTML = '<option value="">All Locations</option>';
+      stSel.innerHTML = '<option value="">All Statuses</option>';
+      if (cliSel) cliSel.innerHTML = '<option value="">All Clients</option>';
+      if (paySel) paySel.innerHTML = '<option value="">All Payment Types</option>';
+
+      const locs = Array.from(new Set(rawRows.map(r => r.location))).sort();
+      const sts = Array.from(new Set(rawRows.map(r => r.status))).sort();
+      const clients = Array
+        .from(new Set(rawRows.map(r => r.Prefix)))
+        .filter(v => v != null && v !== "") // remove this line if you want "(blank)"
+        .sort((a, b) => a.toString().localeCompare(b.toString()));
+      const payTypes = Array.from(new Set(rawRows.map(r => r.corp_or_self))).filter(v => v).sort();
+
+      for (const v of locs) { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; locSel.appendChild(opt); }
+      for (const v of sts) { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; stSel.appendChild(opt); }
+      if (cliSel) { for (const v of clients) { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; cliSel.appendChild(opt); } }
+      if (paySel) { for (const v of payTypes) { const opt = document.createElement("option"); opt.value = v; opt.textContent = v; paySel.appendChild(opt); } }
+    }
+
+    /* ------------------- CUMULATIVE MODULE ------------------- */
+    function populateComparisonPickers() {
+      const df = document.getElementById("dateField").value || "date";
+      const dated = rawRows.filter(r => r[df] instanceof Date);
+      const months = Array.from(new Set(dated.map(r => monthKey(r[df])))).sort();
+      const years = Array.from(new Set(dated.map(r => r[df].getFullYear()))).sort();
+
+      const setOpts = (el, items, label = String) => {
+        el.innerHTML = "";
+        items.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = label(v); el.appendChild(o); });
+      };
+
+      setOpts(document.getElementById("momA"), months, monthKeyLabel);
+      setOpts(document.getElementById("momB"), months, monthKeyLabel);
+      setOpts(document.getElementById("weeksMonth"), months, monthKeyLabel);
+
+      const months12 = Array.from({ length: 12 }, (_, i) => i + 1);
+      setOpts(document.getElementById("yoyMonth"), months12, m => new Date(2000, m - 1, 1).toLocaleString(undefined, { month: "short" }));
+      setOpts(document.getElementById("yoyA"), years);
+      setOpts(document.getElementById("yoyB"), years);
+    }
+
+    function toggleCmpControls() {
+      const v = document.getElementById("cmpType").value;
+      const show = id => document.getElementById(id).style.display = "block";
+      const hide = id => document.getElementById(id).style.display = "none";
+
+      // hide all first
+      ["cmpMomA", "cmpMomB", "cmpYoYMonth", "cmpYoYYearA", "cmpYoYYearB", "cmpWeeksMonth"]
+        .forEach(hide);
+
+      if (v === "mom") {
+        show("cmpMomA"); show("cmpMomB");
+      } else if (v === "yoy") {
+        show("cmpYoYMonth"); show("cmpYoYYearA"); show("cmpYoYYearB");
+      } else if (v === "weeks") {
+        show("cmpWeeksMonth");
+      } else if (v === "yoy_full") {
+        // Full-year YoY: only pick Year A & Year B
+        show("cmpYoYYearA"); show("cmpYoYYearB");
+      }
+    }
+
+    // Determine counts of "New" vs "Reschedule" bookings.
+    // Some cells may contain the keywords alongside other text; to simplify,
+    // we scan every cell for common patterns. If any cell contains
+    // "resched" (e.g. "Rescheduled", "resched", etc.) the row is marked as
+    // "Reschedule". If no reschedule pattern is found but a cell contains
+    // the substring "new", the row is counted as "New". Otherwise it is
+    // counted under "Other".
+    function makeBookingTypeCounts(rows) {
+      const counts = { "New": 0, "Reschedule": 0, "Other": 0 };
+      for (const r of rows) {
+        let isRes = false;
+        let isNew = false;
+        const raw = r._raw || {};
+        // First pass: detect any reschedule patterns
+        for (const key in raw) {
+          const val = (raw[key] || "").toString().toLowerCase();
+          if (/resched/.test(val)) { isRes = true; break; }
+        }
+        // Second pass: detect new bookings if not rescheduled
+        if (!isRes) {
+          for (const key in raw) {
+            const val = (raw[key] || "").toString().toLowerCase();
+            if (val.includes("new")) { isNew = true; break; }
+          }
+        }
+        if (isRes) counts["Reschedule"] += 1;
+        else if (isNew) counts["New"] += 1;
+        else counts["Other"] += 1;
+      }
+      return counts;
+    }
+
+    /**
+     * Compute per-prefix booking changes and aggregated booking distribution relative to recall dates.
+     *
+     * @param {Array<Object>} rows The filtered dataset (viewRows).
+     * @returns {{ scatter: Array<Object>, trend: { days: number[], counts: number[] } }}
+     */
+    function computeRecallChartsData(rows) {
+      // initialise stats for each prefix in recallMap
+      const stats = {};
+      for (const p in recallMap) {
+        const info = recallMap[p];
+        stats[p] = { recallAmount: info.count || 0, before: 0, after: 0 };
+      }
+      // count bookings before and after the recall date per prefix
+      for (const r of rows) {
+        const p = r.Prefix;
+        if (!p || !(p in recallMap)) continue;
+        const rec = recallMap[p];
+        const recDateStr = rec.date;
+        if (!recDateStr) continue;
+        const recDate = new Date(recDateStr);
+        const bd = r.reserved_at || r.date;
+        if (!(bd instanceof Date)) continue;
+        if (bd < recDate) stats[p].before += 1;
+        else stats[p].after += 1;
+      }
+      // build scatter array
+      // Only include prefixes that have at least one booking in the filtered view
+      // (i.e. those with bookings either before or after the recall date). Without this
+      // filter, prefixes that appear in the recall/invite file but have no bookings in
+      // the current view would still appear on the chart with zero increase, making
+      // the recall charts ignore the applied location/status/client filters. By
+      // restricting to prefixes present in the filtered view, the recall analysis
+      // responds correctly to the user's filters.
+      const scatter = [];
+      for (const p in stats) {
+        const s = stats[p];
+        // Skip prefixes with no bookings in the current filtered rows
+        if ((s.before + s.after) === 0) continue;
+        const inc = s.after - s.before;
+        scatter.push({ prefix: p, recallAmount: s.recallAmount, increase: inc });
+      }
+      // aggregate trend counts
+      const agg = {};
+      for (const r of rows) {
+        const p = r.Prefix;
+        if (!p || !(p in recallMap)) continue;
+        const rec = recallMap[p];
+        const recDateStr = rec.date;
+        if (!recDateStr) continue;
+        const recDate = new Date(recDateStr);
+        const bd = r.reserved_at || r.date;
+        if (!(bd instanceof Date)) continue;
+        const diff = Math.round((bd.getTime() - recDate.getTime()) / 86400000);
+        if (diff < -30 || diff > 30) continue;
+        agg[diff] = (agg[diff] || 0) + 1;
+      }
+      const days = [];
+      const counts = [];
+      for (let d = -30; d <= 30; d++) {
+        days.push(d);
+        counts.push(agg[d] || 0);
+      }
+      return { scatter: scatter, trend: { days: days, counts: counts } };
+    }
+
+
+    function renderCumulativeComparison() {
+      try {
+        const ctx = document.getElementById("chartCumulativeCompare");
+        if (!ctx) return;
+        if (charts.cumulative) charts.cumulative.destroy();
+
+        const cmpType = document.getElementById("cmpType").value;
+        const metric = document.getElementById("cmpMetric").value; // 'count' | 'revenue'
+        const dfName = document.getElementById("dateField").value || "date";
+
+        const locSel = document.getElementById("filterLocation").value || "";
+        const stSel = document.getElementById("filterStatus").value || "";
+        const cliSel = (document.getElementById("filterClient") || {}).value || "";
+
+        const base = rawRows.filter(r =>
+          (!locSel || r.location === locSel) &&
+          (!stSel || r.status === stSel) &&
+          (!cliSel || r.Prefix === cliSel) &&
+          (r[dfName] instanceof Date)
+        );
+
+        if (base.length === 0) {
+          // Optional: clear chart or show message
+          return;
+        }
+
+        const valueOf = row => metric === "count" ? 1 : (+row.totals || 0);
+
+        const productSet = new Set(base.map(r => coalesce(r.product_code, "(blank)")));
+        const preferred = ["Advanced", "Advanced Plus", "Essential", "Select"];
+        const products = [...preferred.filter(p => productSet.has(p)), ...[...productSet].filter(p => !preferred.includes(p))];
+
+        let periods = [];
+        if (cmpType === "mom") {
+          const a = document.getElementById("momA").value; // YYYY-MM
+          const b = document.getElementById("momB").value;
+          periods = [
+            { label: monthKeyLabel(a), rows: base.filter(r => monthKey(r[dfName]) === a) },
+            { label: monthKeyLabel(b), rows: base.filter(r => monthKey(r[dfName]) === b) }
+          ];
+
+        } else if (cmpType === "yoy") {
+          const m = parseInt(document.getElementById("yoyMonth").value, 10);
+          const ya = parseInt(document.getElementById("yoyA").value, 10);
+          const yb = parseInt(document.getElementById("yoyB").value, 10);
+          const mLabel = new Date(2000, m - 1, 1).toLocaleString(undefined, { month: "short" });
+          periods = [
+            { label: `${mLabel} ${ya}`, rows: base.filter(r => r[dfName].getFullYear() === ya && (r[dfName].getMonth() + 1) === m) },
+            { label: `${mLabel} ${yb}`, rows: base.filter(r => r[dfName].getFullYear() === yb && (r[dfName].getMonth() + 1) === m) }
+          ];
+
+          /* NEW: Full-year YoY with two separate stacked bars per month */
+        } else if (cmpType === "yoy_full") {
+          const ya = parseInt(document.getElementById("yoyA").value, 10);
+          const yb = parseInt(document.getElementById("yoyB").value, 10);
+          const dfName = document.getElementById("dateField").value || "date";
+          const metric = document.getElementById("cmpMetric").value;
+
+          const monthsIdx = Array.from({ length: 12 }, (_, i) => i + 1);
+          const monthShort = m => new Date(2000, m - 1, 1).toLocaleString(undefined, { month: "short" });
+
+          // Labels Jan..Dec on x-axis
+          const labels = monthsIdx.map(monthShort);
+
+          // Only keep rows from the two chosen years
+          const inYears = base.filter(r => {
+            const y = r[dfName].getFullYear();
+            return y === ya || y === yb;
+          });
+
+          // Product list (keep a stable order)
+          const productSet = new Set(inYears.map(r => coalesce(r.product_code, "(blank)")));
+          const preferred = ["Advanced", "Advanced Plus", "Essential", "Select"];
+          const products = [...preferred.filter(p => productSet.has(p)), ...[...productSet].filter(p => !preferred.includes(p))];
+
+          // Aggregator by (year, month, product)
+          const valueOf = row => (metric === "count" ? 1 : (+row.totals || 0));
+          const agg = (year, month, prod) =>
+            inYears.filter(r => r[dfName].getFullYear() === year &&
+              (r[dfName].getMonth() + 1) === month &&
+              coalesce(r.product_code, "(blank)") == prod)
+              .reduce((s, r) => s + valueOf(r), 0);
+
+          // Build datasets so that:
+          //  - All datasets for Year A share stack "YA"
+          //  - All datasets for Year B share stack "YB"
+          // This makes two separate bars per month, each stacked by product.
+          const ds = [];
+          for (const p of products) {
+            ds.push({
+              label: `${p} (${ya})`,
+              data: monthsIdx.map(m => agg(ya, m, p)),
+              stack: "YA",
+              order: 0,
+              // optional: tweak width/separation per bar
+              barPercentage: 0.48, categoryPercentage: 0.8
+            });
+            ds.push({
+              label: `${p} (${yb})`,
+              data: monthsIdx.map(m => agg(yb, m, p)),
+              stack: "YB",
+              order: 1,
+              barPercentage: 0.48, categoryPercentage: 0.8
+            });
+          }
+
+          const yAxis = metric === "count"
+            ? { beginAtZero: true }
+            : { beginAtZero: true, ticks: { callback: v => "£" + v.toLocaleString() } };
+
+          if (charts.cumulative) charts.cumulative.destroy();
+          charts.cumulative = buildChart(document.getElementById("chartCumulativeCompare"), {
+            type: "bar",
+            data: { labels, datasets: ds },
+            options: {
+              plugins: {
+                legend: { position: "right" },
+                datalabels: (metric === "count" ? dlCountDark : dlCurrency)
+              },
+              // KEY: stacked on both axes; different `stack` values = separate bars
+              scales: { x: { stacked: true }, y: Object.assign({ stacked: true }, yAxis) }
+            }
+          });
+          return; // we've rendered this branch
+
+        } else {
+          // weeks in a month
+          const mk = document.getElementById("weeksMonth").value; // YYYY-MM
+          const [y, m] = mk.split("-").map(Number);
+          const weekIndex = d => { const day = d.getDate(); return day <= 7 ? 1 : day <= 14 ? 2 : day <= 21 ? 3 : 4; };
+          const labelM = new Date(y, m - 1, 1).toLocaleString(undefined, { month: "short", year: "numeric" });
+          periods = [1, 2, 3, 4].map(w => ({
+            label: `${labelM} W${w}`,
+            rows: base.filter(r => r[dfName].getFullYear() === y && (r[dfName].getMonth() + 1) === m && weekIndex(r[dfName]) === w)
+          }));
+        }
+
+
+        const datasets = products.map(prod => ({
+          label: prod,
+          data: periods.map(p => p.rows
+            .filter(r => coalesce(r.product_code, "(blank)") == prod)
+            .reduce((s, r) => s + valueOf(r), 0)
+          ),
+          stack: "cmp"
+        }));
+
+        const yAxis = metric === "count"
+          ? { beginAtZero: true }
+          : { beginAtZero: true, ticks: { callback: v => "£" + v.toLocaleString() } };
+
+        charts.cumulative = buildChart(ctx, {
+          type: "bar",
+          data: { labels: periods.map(p => p.label), datasets },
+          options: {
+            plugins: { legend: { position: "right" }, datalabels: (metric === "count" ? dlCountDark : dlCurrency) },
+            scales: { x: { stacked: true }, y: Object.assign({ stacked: true }, yAxis) }
+          }
+        });
+      } catch (err) {
+        alert("Chart Error: " + err.message);
+        console.error(err);
+      }
+    }
+    /* ----------------- /CUMULATIVE MODULE ------------------- */
+
+    function loadSheetToRows(sheetName) {
+      const ws = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: null });
+      if (!rows.length) throw new Error("Selected sheet has no rows.");
+
+      const cols = inferColumns(rows[0]);
+      if (!cols.date || !cols.totals || !cols.location || !cols.status) {
+        throw new Error("Missing required columns (date, totals, location, status).");
+      }
+
+      rawRows = rows.map(r => {
+        const d = parseExcelDate(r[cols.date]);
+        const res = cols.reserved_at ? parseExcelDate(r[cols.reserved_at]) : null;
+        const t = parseFloat(String(r[cols.totals]).toString().replace(/[^0-9.\-]/g, ""));
+        const age = cols.age ? parseAge(r[cols.age]) : null;
+        return {
+          date: d,
+          reserved_at: res,
+          totals: isNaN(t) ? 0 : t,
+          location: r[cols.location],
+          status: r[cols.status],
+          product_code: cols.product_code ? r[cols.product_code] : null,
+          age: age,
+          sex_at_birth: cols.sex_at_birth ? r[cols.sex_at_birth] : null,
+          process_status: cols.process_status ? r[cols.process_status] : null,
+          Prefix: cols.Prefix ? r[cols.Prefix] : null,
+          single_use_invitation_code: cols.suic ? (r[cols.suic] ?? "") : "",
+          postcode_regions: cols.postcode_regions ? r[cols.postcode_regions] : null,
+          single_use_invitation_code: cols.suic ? (r[cols.suic] ?? "") : "",
+          postcode_regions: cols.postcode_regions ? r[cols.postcode_regions] : null,
+          corp_or_self: cols.corp_or_self ? r[cols.corp_or_self] : null,
+          _raw: r,
+          _rawCols: {
+            date: cols.date, reserved_at: cols.reserved_at || null, totals: cols.totals, location: cols.location, status: cols.status,
+            product_code: cols.product_code || null, age: cols.age || null, sex_at_birth: cols.sex_at_birth || null,
+            process_status: cols.process_status || null, Prefix: cols.Prefix || null, single_use_invitation_code: cols.suic || null,
+            postcode_regions: cols.postcode_regions || null
+          }
+        };
+      });
+
+      viewRows = rawRows.slice();
+      populateFilters();
+
+      // set date pickers from appointment date range
+      const dates = viewRows.map(r => r.date).filter(Boolean).sort((a, b) => a - b);
+      const toInput = d => d ? (new Date(d.getTime() - d.getTimezoneOffset() * 60000)).toISOString().slice(0, 10) : "";
+      document.getElementById("startDate").value = dates[0] ? toInput(dates[0]) : "";
+      document.getElementById("endDate").value = dates[dates.length - 1] ? toInput(dates[dates.length - 1]) : "";
+
+      updateKPIs();
+      updateCharts();
+      renderTable();
+
+      // prep cumulative controls and draw once
+      populateComparisonPickers();
+      toggleCmpControls();
+      renderCumulativeComparison();
+    }
+
+    function loadWorkbook(arrBuf) {
+      workbook = XLSX.read(arrBuf, { type: "array" });
+      // After loading a workbook, immediately embed its contents into the hidden JSON
+      // container. This ensures the export functions have access to the latest
+      // workbook data without requiring the original Excel file.
+      if (typeof embedWorkbook === 'function') embedWorkbook();
+      const sheetSelect = document.getElementById("sheetSelect");
+      sheetSelect.innerHTML = "";
+      for (const n of workbook.SheetNames) {
+        const opt = document.createElement("option"); opt.value = n; opt.textContent = n; sheetSelect.appendChild(opt);
+      }
+      // Automatically select a preferred data sheet (if any) and load it
+      const preferred = detectDataSheet(workbook);
+      if (preferred) { sheetSelect.value = preferred; loadSheetToRows(preferred); }
+    }
+
+    /**
+     * Load a recall/invites workbook and populate the global recallMap.
+     * The workbook is expected to contain columns for Prefix, Recalls/Reminders Sent,
+     * Invites, and Completed (or Date Sent). Column names are matched case-insensitively.
+     * Each row will update recallMap[prefix] with a count, invites and date (YYYY-MM-DD).
+     */
+    function loadRecallWorkbook(arrBuf) {
+      const wb = XLSX.read(arrBuf, { type: "array" });
+      if (!wb || !wb.SheetNames || !wb.SheetNames.length) return;
+      const sheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: null });
+      // Reset recallMap
+      recallMap = {};
+      rows.forEach(row => {
+        // Extract prefix (case-insensitive)
+        const prefix = row['Prefix'] || row['prefix'] || row['Prefix '] || row['prefix '] || null;
+        if (!prefix) return;
+        // Extract recall count (handle numeric and string with numbers)
+        let recCount = row['Recalls/Reminders Sent'];
+        if (recCount == null) recCount = row['Recalls'] || row['Recalls Sent'] || row['Recall'] || 0;
+        const rc = parseInt(String(recCount || 0).toString().replace(/[^0-9\-]/g, "")) || 0;
+        // Extract invites
+        let invites = row['Invites'];
+        if (invites == null) invites = row['Invitation'] || row['Invitations'] || 0;
+        const iv = parseInt(String(invites || 0).toString().replace(/[^0-9\-]/g, "")) || 0;
+        // Extract completion date
+        const rawDate = row['Completed'] || row['Date Sent'] || row['Date'] || row['Completed '] || null;
+        const dt = parseExcelDate(rawDate);
+        const dateStr = dt ? dt.toISOString().split('T')[0] : null;
+        recallMap[prefix] = { count: rc, invites: iv, date: dateStr };
+      });
+    }
+
+    // ---- Drag-and-drop management
+    function currentOrder() {
+      return Array.from(document.querySelectorAll("#chartsGrid .chart-card")).map(el => el.dataset.key);
+    }
+    function saveOrder() {
+      localStorage.setItem(LAYOUT_KEY, JSON.stringify(currentOrder()));
+    }
+    function loadOrder() {
+      const raw = localStorage.getItem(LAYOUT_KEY);
+      if (!raw) return;
+      try {
+        const keys = JSON.parse(raw);
+        const grid = document.getElementById("chartsGrid");
+        const lookup = {};
+        Array.from(grid.children).forEach(el => lookup[el.dataset.key] = el);
+        keys.forEach(k => { if (lookup[k]) grid.appendChild(lookup[k]); });
+        // append any missing keys at the end
+        Array.from(grid.children).forEach(el => { if (!keys.includes(el.dataset.key)) grid.appendChild(el); });
+      } catch (e) { /* ignore */ }
+    }
+
+    function setArrangeMode(on) {
+      const btn = document.getElementById("arrangeBtn");
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      document.body.classList.toggle("arranging", on);
+      if (on && !sortable) {
+        sortable = new Sortable(document.getElementById("chartsGrid"), {
+          animation: 150,
+          handle: ".drag-handle",
+          ghostClass: "drag-ghost",
+          onEnd: saveOrder
+        });
+      } else if (!on && sortable) {
+        sortable.destroy();
+        sortable = null;
+      }
+    }
+
+    // -------- Data embedding and export helpers ----------
+    // Convert the loaded workbook into a JSON object keyed by sheet name and
+    // store it in the hidden <script id="embeddedData"> element. This allows
+    // the dashboard to persist the workbook in a self‑contained form for
+    // exporting without the original Excel file. If no workbook is loaded
+    // the function does nothing.
+    function embedWorkbook() {
+      if (!workbook) return;
+      const dataObj = {};
+      workbook.SheetNames.forEach(name => {
+        const ws = workbook.Sheets[name];
+        dataObj[name] = XLSX.utils.sheet_to_json(ws, { defval: null });
+      });
+      const container = document.getElementById("embeddedData");
+      if (container) {
+        container.textContent = JSON.stringify(dataObj);
+      }
+    }
+
+    // Build a standalone HTML report from the current filtered view. The report
+    // will include the same charts, KPIs and table but only the filtered
+    // records. It removes upload controls and adds a bootstrap script that
+    // initialises the page with the embedded filtered data.
+    function exportFilteredReport() {
+      if (!viewRows || viewRows.length === 0) {
+        alert("No filtered data to export.");
+        return;
+      }
+      // Collect raw row objects so original column names and values are preserved
+      // Include normalized field values to ensure charts and KPIs work in exported reports
+      // The bootstrap script expects lowercase keys like 'age', 'date', etc.
+      const filteredData = viewRows.map(r => {
+        const raw = r._raw || {};
+        // Add all normalized values with lowercase keys expected by bootstrap script
+        // These may differ from the original Excel column names
+        if (r.age != null) raw.age = r.age;
+        if (r.date) raw.date = r.date instanceof Date ? r.date.toISOString() : r.date;
+        if (r.reserved_at) raw.reserved_at = r.reserved_at instanceof Date ? r.reserved_at.toISOString() : r.reserved_at;
+        if (r.location) raw.location = r.location;
+        if (r.status) raw.status = r.status;
+        if (r.product_code) raw.product_code = r.product_code;
+        if (r.sex_at_birth) raw.sex_at_birth = r.sex_at_birth;
+        if (r.process_status) raw.process_status = r.process_status;
+        if (r.Prefix) raw.Prefix = r.Prefix;
+        if (r.single_use_invitation_code) raw.single_use_invitation_code = r.single_use_invitation_code;
+        if (r.postcode_regions) raw.postcode_regions = r.postcode_regions;
+        if (r.corp_or_self) raw.corp_or_self = r.corp_or_self;
+        if (r.totals != null) raw.totals = r.totals;
+        return raw;
+      });
+      // Clone the current document HTML
+      const serializer = new XMLSerializer();
+      const currentDoc = document.implementation.createHTMLDocument('report');
+      currentDoc.documentElement.innerHTML = document.documentElement.innerHTML;
+      const doc = currentDoc;
+      // Remove file upload and editing controls from the toolbar
+      const toolbar = doc.querySelector('.uploader.toolbar');
+      if (toolbar) {
+        toolbar.querySelector('#fileInput')?.remove();
+        toolbar.querySelector('#sheetSelect')?.remove();
+        toolbar.querySelector('#loadBtn')?.remove();
+        toolbar.querySelector('#arrangeBtn')?.remove();
+        toolbar.querySelector('#resetLayoutBtn')?.remove();
+        toolbar.querySelector('#exportBtn')?.remove();
+        toolbar.querySelector('#exportFilteredBtn')?.remove();
+        toolbar.querySelector('#exportReportBtn')?.remove();
+      }
+      // Write the filtered data into the embeddedData script
+      let dataEl = doc.getElementById('embeddedData');
+      if (!dataEl) {
+        dataEl = doc.createElement('script');
+        dataEl.id = 'embeddedData';
+        dataEl.type = 'application/json';
+        doc.body.appendChild(dataEl);
+      }
+      // Wrap the filtered data in an object keyed by 'Filtered'.
+      // Also include a snapshot of recallMap so that recall/invite charts
+      // continue to function in the exported report. Without including
+      // recallMap, the exported report would have an empty recallMap and
+      // therefore show no data on the recall charts.
+      const recallSnapshot = {};
+      Object.keys(recallMap || {}).forEach(prefix => {
+        const val = recallMap[prefix] || {};
+        recallSnapshot[prefix] = {
+          count: val.count || 0,
+          invites: val.invites || 0,
+          date: val.date || null
+        };
+      });
+      dataEl.textContent = JSON.stringify({ Filtered: filteredData, RecallMap: recallSnapshot });
+      // Append a bootstrap script to initialise the page from the embedded data
+      const boot = doc.createElement('script');
+      boot.textContent = `\n      (function(){\n        try {\n          const dataEl = document.getElementById('embeddedData');\n          if (!dataEl) return;\n          const parsed = JSON.parse(dataEl.textContent || '{}');\n          const rows = parsed.Filtered || [];\n          // restore recallMap snapshot if present\n          const recall = parsed.RecallMap || {};\n          recallMap = recall;\n          if (!Array.isArray(rows) || !rows.length) return;\n          // Convert raw rows into processed rows using existing helpers\n          rawRows = rows.map(function(r){\n            const d  = parseExcelDate(r['date']);\n            const res = parseExcelDate(r['reserved_at']);\n            const t  = parseFloat(String(r['totals']).replace(/[^0-9.\-]/g,''));\n            const age = parseAge(r['age']);\n            return {\n              date: d,\n              reserved_at: res,\n              totals: isNaN(t) ? 0 : t,\n              location: r['location'],\n              status: r['status'],\n              product_code: r['product_code'],\n              age: age,\n              sex_at_birth: r['sex_at_birth'],\n              process_status: r['process_status'],\n              Prefix: r['Prefix'],\n              single_use_invitation_code: r['single_use_invitation_code'],\n              postcode_regions: r['postcode_regions'],\n              corp_or_self: r['corp_or_self'],\n              _raw: r,\n              _rawCols: {}\n            };\n          });\n          viewRows = rawRows.slice();\n          populateFilters();\n          updateKPIs();\n          updateCharts();\n          renderTable();\n          populateComparisonPickers();\n          toggleCmpControls();\n          renderCumulativeComparison();\n        } catch(e){ console.error('report init error', e); }\n      })();\n      `;
+      doc.body.appendChild(boot);
+      // Serialize the modified document to a string
+      const finalHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+      const blob = new Blob([finalHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'client_report.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Events (conditionally attach handlers only when the element exists)
+    {
+      const loadBtn = document.getElementById("loadBtn");
+      if (loadBtn) {
+        loadBtn.addEventListener("click", async () => {
+          const input = document.getElementById("fileInput");
+          if (!input || !input.files.length) { alert("Choose an Excel file first."); return; }
+          const file = input.files[0];
+          const arr = await file.arrayBuffer();
+          loadWorkbook(arr);
+        });
+      }
+
+      const sheetSel = document.getElementById("sheetSelect");
+      if (sheetSel) {
+        sheetSel.addEventListener("change", (e) => {
+          if (!workbook) return;
+          try { loadSheetToRows(e.target.value); } catch (err) { alert(err.message); }
+        });
+      }
+
+      // Load recall/invites workbook on file selection
+      const recallInput = document.getElementById("recallInput");
+      if (recallInput) {
+        recallInput.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const arr = await file.arrayBuffer();
+          loadRecallWorkbook(arr);
+          // After loading recall/invites data, update charts and comparison module
+          updateCharts();
+          renderCumulativeComparison();
+        });
+      }
+
+      const applyBtn = document.getElementById("applyFilters");
+      if (applyBtn) {
+        applyBtn.addEventListener("click", () => {
+          applyFiltersToRows();
+          updateKPIs();
+          updateCharts();
+          renderTable();
+          renderCumulativeComparison();
+        });
+      }
+
+      const layoutSel = document.getElementById("layoutMode");
+      if (layoutSel) {
+        layoutSel.addEventListener("change", (e) => {
+          try {
+            const mode = e.target.value;
+            document.body.classList.remove("compact", "spacious");
+            document.body.classList.add(mode);
+            updateCharts();
+            renderCumulativeComparison();
+          } catch (err) { console.error("Layout switch error:", err); }
+        });
+      }
+
+      const dpiSel = document.getElementById("dpiScale");
+      if (dpiSel) {
+        dpiSel.addEventListener("change", (e) => {
+          try {
+            scale = parseFloat(e.target.value);
+            updateCharts();
+            renderCumulativeComparison();
+          } catch (err) { console.error("DPI switch error:", err); }
+        });
+      }
+
+      const arrangeBtn = document.getElementById("arrangeBtn");
+      if (arrangeBtn) {
+        arrangeBtn.addEventListener("click", (e) => {
+          const on = e.currentTarget.getAttribute("aria-pressed") !== "true";
+          setArrangeMode(on);
+        });
+      }
+
+      const resetBtn = document.getElementById("resetLayoutBtn");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          localStorage.removeItem(LAYOUT_KEY);
+          location.reload();
+        });
+      }
+
+      // Export handlers
+      const exportBtn = document.getElementById("exportBtn");
+      if (exportBtn) {
+        exportBtn.addEventListener("click", () => {
+          if (!workbook) {
+            alert("Load an Excel file first.");
+            return;
+          }
+          embedWorkbook();
+          const dataEl = document.getElementById("embeddedData");
+          const jsonStr = dataEl ? (dataEl.textContent || "{}") : "{}";
+          const blob = new Blob([jsonStr], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = "report_data.json";
+          a.style.display = "none";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+      }
+
+      const exportFiltBtn = document.getElementById("exportFilteredBtn");
+      if (exportFiltBtn) {
+        exportFiltBtn.addEventListener("click", () => {
+          if (!viewRows || viewRows.length === 0) {
+            alert("No filtered data to export.");
+            return;
+          }
+          const data = viewRows.map(r => r._raw || {});
+          const jsonStr = JSON.stringify(data, null, 2);
+          const blob = new Blob([jsonStr], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = "filtered_data.json";
+          a.style.display = "none";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+      }
+
+      const exportReportBtn = document.getElementById("exportReportBtn");
+      if (exportReportBtn) {
+        exportReportBtn.addEventListener("click", () => {
+          exportFilteredReport();
+        });
+      }
+
+      // Presentation Mode Handlers
+      const presentBtn = document.getElementById("presentBtn");
+      if (presentBtn) {
+        presentBtn.addEventListener("click", () => {
+          const dlg = document.getElementById("modeDialog");
+          if (dlg) dlg.showModal();
+        });
+      }
+
+      const startInternal = document.getElementById("startInternalBtn");
+      if (startInternal) {
+        startInternal.addEventListener("click", (e) => {
+          e.preventDefault();
+          console.log("[DEBUG] startInternalBtn clicked");
+          console.log("[DEBUG] startPresentation type:", typeof startPresentation);
+          if (typeof startPresentation === 'function') {
+            console.log("[DEBUG] Calling startPresentation('internal')");
+            startPresentation("internal");
+          } else {
+            console.error("startPresentation function not defined");
+          }
+          document.getElementById("modeDialog").close();
+        });
+      }
+
+      const startClient = document.getElementById("startClientBtn");
+      if (startClient) {
+        startClient.addEventListener("click", (e) => {
+          e.preventDefault();
+          console.log("[DEBUG] startClientBtn clicked");
+          if (typeof startPresentation === 'function') {
+            startPresentation("client");
+          } else {
+            console.error("startPresentation function not defined");
+          }
+          document.getElementById("modeDialog").close();
+        });
+      }
+
+      // Cumulative comparison controls
+      const cmpTypeSel = document.getElementById("cmpType");
+      if (cmpTypeSel) cmpTypeSel.addEventListener("change", toggleCmpControls);
+
+      const buildCmpBtn = document.getElementById("buildCmp");
+      if (buildCmpBtn) buildCmpBtn.addEventListener("click", renderCumulativeComparison);
+
+      const dateFieldSel = document.getElementById("dateField");
+      if (dateFieldSel) {
+        dateFieldSel.addEventListener("change", () => {
+          populateComparisonPickers();
+          toggleCmpControls();
+          renderCumulativeComparison();
+        });
+      }
+    }
+
+    // ---------------------- Theme management ----------------------
+    // Dynamically switch between dark and light colour schemes. This function adjusts
+    // CSS classes, Chart.js global defaults and datalabel colours, then redraws
+    // all charts and comparison modules. The selected theme is persisted in
+    // localStorage so that the user sees the same theme on next visit.
+    function applyTheme(theme) {
+      if (theme === "light") {
+        document.body.classList.add("light");
+        // Set Chart.js default text colour to dark for better contrast on light backgrounds
+        Chart.defaults.color = "#000000";
+        // Update datalabel colours
+        dlCountDark.color = "#000000";
+        dlCurrency.color = "#000000";
+        dlPie.color = "#000000";
+      } else {
+        document.body.classList.remove("light");
+        Chart.defaults.color = "#e5e7eb";
+        dlCount.color = "#e5e7eb";
+        dlCurrency.color = "#e5e7eb";
+        dlPie.color = "#ffffff";
+      }
+      try { localStorage.setItem("fhm_theme", theme); } catch (e) { /* ignore */ }
+      // Redraw charts to apply new defaults. Only run if rawRows has been
+      // populated; updateCharts will noop on empty data.
+      updateCharts();
+      renderCumulativeComparison();
+    }
+
+    // Initialize the theme selector and apply the persisted theme on load.
+    (function () {
+      const sel = document.getElementById("themeSelect");
+      if (!sel) return;
+      let saved;
+      try { saved = localStorage.getItem("fhm_theme") || sel.value; } catch (e) { saved = sel.value; }
+      sel.value = saved;
+      // Apply once on load
+      applyTheme(saved);
+      sel.addEventListener("change", (e) => {
+        applyTheme(e.target.value);
+      });
+    })();
+
+    // Apply saved order on first paint
+    loadOrder();
+
+
+
+    function startPresentation(mode) {
+      console.log("[DEBUG] ENTERED startPresentation, mode:", mode);
+      currentSlide = 0;
+      slides = [];
+      const d = new Date().toLocaleDateString(undefined, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      slides.push({
+        type: "title",
+        title: mode === "internal" ? "Internal Performance Review" : "Client Performance Report",
+        sub: d
+      });
+
+      // Define Chart mapping
+      const map = [
+        { key: "prodDist", title: "Product Mix" },
+        { key: "sexDist", title: "Demographics: Sex" },
+        { key: "ageByProduct", title: "Age Profile by Product" },
+        { key: "procDist", title: "Process Status" },
+        { key: "bookingType", title: "New vs Reschedule" },
+        { key: "stacked", title: "Volume by Location & Product" },
+        { key: "selfPayOrigin", title: "Self Pay Sources" },
+        { key: "topClients", title: "Top 25 Clients" },
+        { key: "topPostcodes", title: "Top 25 Postcode Regions" },
+        { key: "revenueLoc", title: "Revenue by Location", internalOnly: true },
+        { key: "revByMonth", title: "Revenue by Month", internalOnly: true }
+      ];
+
+      for (const m of map) {
+        if (m.internalOnly && mode !== "internal") continue;
+        if (charts[m.key]) {
+          slides.push({
+            type: "chart",
+            key: m.key,
+            title: m.title
+          });
+        }
+      }
+
+      slides.push({
+        type: "end",
+        title: "Thank You",
+        sub: "Questions?"
+      });
+
+      console.log("[DEBUG] startPresentation called with mode:", mode);
+      console.log("[DEBUG] slides array:", slides);
+      document.getElementById("presentationOverlay").style.display = "flex";
+      console.log("[DEBUG] Overlay display set to flex");
+      renderSlide();
+    }
+
+    function renderSlide() {
+      try {
+        console.log("[DEBUG] renderSlide called, currentSlide:", currentSlide, "slides.length:", slides.length);
+        const s = slides[currentSlide];
+        if (!s) {
+          console.error("[DEBUG] slides[currentSlide] is undefined!");
+          return;
+        }
+        console.log("[DEBUG] Rendering slide:", s);
+        const titleEl = document.getElementById("slideTitle");
+        const subEl = document.getElementById("slideCounter");
+        const container = document.getElementById("activeSlideFrame");
+
+        titleEl.textContent = s.title;
+        subEl.textContent = `${currentSlide + 1} / ${slides.length}`;
+        container.innerHTML = "";
+
+        // Cleanup previous chart instance if exists
+        if (activePresentChart) {
+          activePresentChart.destroy();
+          activePresentChart = null;
+        }
+
+        if (s.type === "title" || s.type === "end") {
+          container.innerHTML = `
+            <div style="text-align:center; animation: fadeIn 0.5s ease;">
+              <h1 style="font-size:3rem; margin-bottom:1rem; color:var(--text-main);">${s.title}</h1>
+              <h2 style="font-size:1.5rem; color:var(--text-muted); font-weight:400;">${s.sub}</h2>
+            </div>`;
+        } else if (s.type === "chart") {
+          const item = charts[s.key];
+          if (item) {
+            const canvas = document.createElement("canvas");
+            container.appendChild(canvas);
+            const cfg = item.config;
+            activePresentChart = new Chart(canvas, {
+              type: cfg.type,
+              data: cfg.data,
+              options: {
+                ...cfg.options,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    labels: { color: document.body.classList.contains("light") ? "#000" : "#fff", font: { size: 16 } }
+                  },
+                  datalabels: {
+                    ...cfg.options.plugins.datalabels,
+                    font: { size: 14, weight: 'bold' }
+                  }
+                },
+                scales: cfg.options.scales // Reuse scales config
+              }
+            });
+          }
+        }
+
+        // Update buttons
+        const prevBtn = document.getElementById("prevSlideBtn");
+        const nextBtn = document.getElementById("nextSlideBtn");
+        if (prevBtn) prevBtn.disabled = currentSlide === 0;
+        if (nextBtn) nextBtn.disabled = currentSlide === slides.length - 1;
+        console.log("[DEBUG] renderSlide completed successfully");
+      } catch (err) {
+        console.error("[DEBUG] renderSlide error:", err);
+      }
+    }
+
+    const nextSlideBtn = document.getElementById("nextSlideBtn");
+    if (nextSlideBtn) {
+      nextSlideBtn.addEventListener("click", () => {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          renderSlide();
+        }
+      });
+    }
+
+    const prevSlideBtn = document.getElementById("prevSlideBtn");
+    if (prevSlideBtn) {
+      prevSlideBtn.addEventListener("click", () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          renderSlide();
+        }
+      });
+    }
+
+    const exitPresentBtn = document.getElementById("exitPresentBtn");
+    if (exitPresentBtn) {
+      exitPresentBtn.addEventListener("click", () => {
+        document.getElementById("presentationOverlay").style.display = "none";
+        if (activePresentChart) {
+          activePresentChart.destroy();
+          activePresentChart = null;
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

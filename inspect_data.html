@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Excel Inspector</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <h1>Excel Inspector</h1>
+    <input type="file" id="fileInput">
+    <pre id="output">Waiting for file...</pre>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    // Get headers and first few rows
+                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    const preview = json.slice(0, 5); // First 5 rows
+
+                    document.getElementById('output').textContent = JSON.stringify(preview, null, 2);
+                } catch (err) {
+                    document.getElementById('output').textContent = "Error: " + err.message;
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+
+</html>

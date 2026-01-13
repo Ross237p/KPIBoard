@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-chart-line text-indigo-600 text-2xl mr-3"></i>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">Booking Analytics</span>
+                </div>
+                <div class="flex items-center">
+                    <button id="loadSampleBtn" class="text-sm text-indigo-600 hover:text-indigo-800 mr-4 font-medium">
+                        Load Sample Data
+                    </button>
+                    <div class="relative">
+                        <label for="fileInput"
+                            class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
+                            <i class="fa-solid fa-upload mr-2"></i> Upload Excel
+                        </label>
+                        <input type="file" id="fileInput" accept=".xlsx, .csv" class="hidden">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Welcome State -->
+        <div id="welcomeState" class="text-center py-20">
+            <div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-100 max-w-2xl mx-auto">
+                <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-cloud-arrow-up text-indigo-600 text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Upload your Booking Data</h2>
+                <p class="text-slate-500 mb-8">Upload your Excel file to generate insights instantly.</p>
+                <label for="fileInputHero"
+                    class="cursor-pointer inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:text-lg transition-all shadow-md hover:shadow-lg">
+                    Choose File
+                </label>
+                <input type="file" id="fileInputHero" accept=".xlsx, .csv" class="hidden">
+                <p class="mt-4 text-xs text-slate-400">Supports .xlsx and .csv files</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Content (Hidden by default) -->
+        <div id="dashboardContent" class="hidden space-y-8">
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Revenue -->
+                <div
+                    class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-slate-500">Total Revenue</h3>
+                        <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-sterling-sign text-emerald-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline">
+                        <p class="text-2xl font-bold text-slate-900" id="kpiRevenue">£0.00</p>
+                    </div>
+                </div>
+
+                <!-- Bookings -->
+                <div
+                    class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-slate-500">Total Bookings</h3>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-calendar-check text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline">
+                        <p class="text-2xl font-bold text-slate-900" id="kpiBookings">0</p>
+                    </div>
+                </div>
+
+                <!-- Avg Age -->
+                <div
+                    class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-slate-500">Average Age</h3>
+                        <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-user-group text-purple-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline">
+                        <p class="text-2xl font-bold text-slate-900" id="kpiAvgAge">0</p>
+                    </div>
+                </div>
+
+                <!-- Top Region -->
+                <div
+                    class="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-slate-500">Top Region</h3>
+                        <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-map-location-dot text-amber-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline">
+                        <p class="text-2xl font-bold text-slate-900 truncate" id="kpiTopRegion">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Trend Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6 lg:col-span-2">
+                    <h3 class="text-lg font-bold text-slate-900 mb-6">Booking Trends</h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Status Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-6">Booking Status</h3>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Region Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-6">Bookings by Region</h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Type Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-6">Corporate vs Self Pay</h3>
+                    <div class="relative h-64 w-full flex justify-center">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-100">
+                    <h3 class="text-lg font-bold text-slate-900">Recent Bookings</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-600">
+                        <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
+                            <tr>
+                                <th class="px-6 py-3">Date</th>
+                                <th class="px-6 py-3">Name</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Type</th>
+                                <th class="px-6 py-3">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100" id="dataTableBody">
+                            <!-- Rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
