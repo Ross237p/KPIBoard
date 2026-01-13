@@ -58,6 +58,33 @@ The Excel file (`.xlsx` or `.xls`) must contain the following Key columns for th
 
 *Note: Ensure your Excel file headers exactly match these names.*
 
+## Visualizations Explained
+
+The dashboard includes the following 15 interactive charts:
+
+### Financial & Product Performance
+1.  **Revenue by Month**: Line chart tracking total revenue trends over time.
+2.  **Sum of Totals by Location**: Bar chart ranking locations by total revenue generated.
+3.  **Product Mix (Count)**: Pie chart showing the volume share of different products/services.
+4.  **Payment Ratio by Product**: 100% Stacked bar showing the split of Corporate vs. Self Pay vs. Flex for key products.
+5.  **Cumulative Product Mix Comparison**: A powerful tool to compare performance (Revenue or Count) between two periods (e.g., Month vs Month, or Year over Year).
+
+### Demographics & Origin
+6.  **Age Distribution by Product**: Groups patients into age bands (e.g., 20-29, 30-39) broken down by the product they booked.
+7.  **Sex at Birth**: Pie chart of patient gender distribution.
+8.  **Top 25 Postcode Regions**: Bar chart showing where patients are travelling from (based on postcode area).
+9.  **Self Pay Origin**: Tracks how self-pay patients found the service (e.g., Website vs. Phone).
+
+### Operational & Recalls
+10. **Count by Product & Location**: Stacked bar showing which locations are performing best for specific products.
+11. **Process Status**: Pie chart of booking statuses (Completed, Cancelled, etc.).
+12. **New vs Reschedule**: Quick view of new business vs. rescheduled appointments.
+13. **Top 25 Clients**: Ranking of the most frequent corporate clients (by Prefix).
+14. **Recalls & Invites vs Booking Increase**: Correlates recall communications with actual booking uplifts.
+15. **Bookings Around Recall Date**: Line chart showing booking intensity in the +/- 30 days surrounding a recall campaign.
+
+## Project Structure
+
 -   `index.html`: The main dashboard application structure and logic.
 -   `server.js`: Simple HTTP server to host the application locally.
 -   `style.css`: Core styling (though much is embedded in `index.html`).
