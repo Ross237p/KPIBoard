@@ -41,7 +41,22 @@ A client-side analytics dashboard that visualizes booking and revenue data from 
 3.  **Analyze**: Use the filters on the left/top to drill down into specific locations or time periods.
 4.  **Present**: Click the "Presentation Mode" button (TV icon) to enter a simplified slide view perfect for meetings.
 
-## Project Structure
+## Data Requirements
+
+The Excel file (`.xlsx` or `.xls`) must contain the following Key columns for the dashboard to function correctly:
+
+| Column Name | Description |
+| :--- | :--- |
+| `date` | Appointment date (primary date field) |
+| `totals` | Revenue amount for the booking |
+| `location` | Site/Hospital Name |
+| `status` | Booking status (e.g., 'Booked', 'Cancelled') |
+| `Corporate Or Self Pay` | Payment categorization |
+| `Prefix` | Client/Patient Prefix |
+| `postcode_region` | Region derived from postcode |
+| `product_code` | Code for the service/product booked |
+
+*Note: Ensure your Excel file headers exactly match these names.*
 
 -   `index.html`: The main dashboard application structure and logic.
 -   `server.js`: Simple HTTP server to host the application locally.
