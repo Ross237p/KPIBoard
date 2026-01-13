@@ -1347,11 +1347,12 @@
       const byMonth = Array.from(groupBy(viewRows.filter(r => r[df]), r => monthKey(r[df])).entries())
         .map(([mk, rows]) => {
           const dt = rows[0][df];
-          return { key: mk, label: monthLabel(dt), revenue: rows.reduce((s, r) => s + (r.totals || 0), 0), ts: dt.getTime() };
+          return { key: mk, label: monthLabel(dt), revenue: rows.reduce((s, r) => s + (r.totals || 0), 0), count: rows.length, ts: dt.getTime() };
         })
         .sort((a, b) => a.ts - b.ts);
       const monthLabels = byMonth.map(x => x.label);
       const monthData = byMonth.map(x => +(x.revenue.toFixed(2)));
+      const monthCountData = byMonth.map(x => x.count);
 
       // Destroy old charts
       for (const k of Object.keys(charts)) { if (charts[k]) charts[k].destroy(); }
@@ -1425,8 +1426,21 @@
 
       charts.month = buildChart(document.getElementById("chartRevByMonth"), {
         type: "line",
-        data: { labels: monthLabels, datasets: [{ label: "Revenue", data: monthData, tension: .25, fill: true, backgroundColor: "rgba(0, 159, 227, 0.1)", borderColor: brandBlue }] },
-        options: { plugins: { legend: { position: "bottom" }, datalabels: dlCurrency }, scales: { y: { beginAtZero: true, ticks: { color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
+        data: {
+          labels: monthLabels,
+          datasets: [
+            { label: "Revenue", data: monthData, tension: .25, fill: true, backgroundColor: "rgba(0, 159, 227, 0.1)", borderColor: brandBlue, yAxisID: 'y' },
+            { label: "Appointments", data: monthCountData, tension: .25, fill: false, borderColor: accentOrange, backgroundColor: accentOrange, yAxisID: 'y2' }
+          ]
+        },
+        options: {
+          plugins: { legend: { position: "bottom" }, datalabels: { display: false } },
+          scales: {
+            y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Revenue (£)', color: getFontColor() }, ticks: { callback: (v) => '£' + v.toLocaleString(), color: getFontColor() } },
+            y2: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Appointments', color: getFontColor() }, ticks: { color: getFontColor() } },
+            x: { ticks: { color: getFontColor() } }
+          }
+        }
       });
 
       // ---- Recall and invites analysis charts ----
