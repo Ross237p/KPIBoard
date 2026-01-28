@@ -871,8 +871,14 @@
 
         <div class="chart-card card" data-key="stackedProdLoc">
           <div class="card-header">
-            <h3 style="margin:0">Count by Product & Location (stacked)</h3><span class="drag-handle"
-              title="Drag to move">⋮⋮</span>
+            <h3 style="margin:0">Count by Product & Location (stacked)</h3>
+            <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+              <label style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">Forecast +</label>
+              <input type="range" id="forecastSlider" min="0" max="100" value="0" style="width:100px; accent-color:var(--primary); cursor:pointer;">
+              <input type="number" id="forecastInput" min="0" max="100" value="0" style="width:50px; padding:2px 4px; font-size:0.8rem; text-align:center; border-radius:4px; border:1px solid var(--border); background:var(--surface); color:var(--text);">
+              <span style="font-size:0.75rem; color:var(--text-muted);">%</span>
+            </div>
+            <span class="drag-handle" title="Drag to move">⋮⋮</span>
           </div>
           <div class="chart-frame"><canvas id="chartStackedProdLocation"></canvas></div>
         </div>
@@ -1001,6 +1007,8 @@
     // Map of recall data keyed by prefix. Populated when a recall workbook is loaded.
     // Each entry has the structure { count: Number, invites: Number, date: 'YYYY-MM-DD' }.
     let recallMap = {};
+    // Base stacked chart data for forecast calculations
+    let baseStackedData = { labels: [], datasets: [] };
 
     const LAYOUT_KEY = "fhm_chart_order_v1";
 
@@ -1374,6 +1382,17 @@
         data: { labels: usedBands, datasets: ageDatasets },
         options: { plugins: { legend: { position: "right" }, datalabels: dlCountDark }, scales: { y: { beginAtZero: true, ticks: { color: getFontColor() } }, x: { ticks: { color: getFontColor() } } } }
       });
+
+      // Store base stacked data for forecast calculations
+      baseStackedData = {
+        labels: locLabels,
+        datasets: datasetsStacked.map(ds => ({ ...ds, data: [...ds.data] }))
+      };
+      // Reset forecast slider when data refreshes
+      const forecastSlider = document.getElementById("forecastSlider");
+      const forecastInput = document.getElementById("forecastInput");
+      if (forecastSlider) forecastSlider.value = 0;
+      if (forecastInput) forecastInput.value = 0;
 
       charts.stacked = buildChart(document.getElementById("chartStackedProdLocation"), {
         type: "bar",
@@ -2413,6 +2432,62 @@
         });
       }
     }
+
+    // ---------------------- Forecast functionality ----------------------
+    // Applies a percentage increase to the stacked product/location chart
+    // to help forecast future demand based on historical data.
+    function applyForecast(percentage) {
+      if (!charts.stacked || !baseStackedData.datasets.length) return;
+      const multiplier = 1 + (percentage / 100);
+
+      // Update each dataset with forecasted values
+      charts.stacked.data.datasets.forEach((ds, i) => {
+        const baseData = baseStackedData.datasets[i]?.data || [];
+        ds.data = baseData.map(val => Math.round(val * multiplier));
+      });
+
+      // Update chart title to reflect forecast
+      const chartCard = document.querySelector('[data-key="stackedProdLoc"] h3');
+      if (chartCard) {
+        chartCard.textContent = percentage > 0
+          ? `Count by Product & Location (+${percentage}% forecast)`
+          : 'Count by Product & Location (stacked)';
+      }
+
+      charts.stacked.update();
+    }
+
+    // Set up forecast slider and input event listeners
+    (function initForecastControls() {
+      const slider = document.getElementById("forecastSlider");
+      const input = document.getElementById("forecastInput");
+      if (!slider || !input) return;
+
+      // Sync slider to input and apply forecast
+      slider.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        input.value = val;
+        applyForecast(val);
+      });
+
+      // Sync input to slider and apply forecast
+      input.addEventListener("input", (e) => {
+        let val = parseInt(e.target.value, 10) || 0;
+        val = Math.max(0, Math.min(100, val)); // Clamp between 0-100
+        e.target.value = val;
+        slider.value = val;
+        applyForecast(val);
+      });
+
+      // Also handle change event for input (when user tabs out or presses enter)
+      input.addEventListener("change", (e) => {
+        let val = parseInt(e.target.value, 10) || 0;
+        val = Math.max(0, Math.min(100, val));
+        e.target.value = val;
+        slider.value = val;
+        applyForecast(val);
+      });
+    })();
 
     // ---------------------- Theme management ----------------------
     // Dynamically switch between dark and light colour schemes. This function adjusts
