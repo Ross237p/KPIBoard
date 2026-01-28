@@ -700,6 +700,13 @@
         </div>
         <div class="kpi">
           <div class="kpi-content">
+            <div class="label">Avg (excl. £0)</div>
+            <div class="value" id="kpiARPUExcl">—</div>
+          </div>
+          <i class="fa-solid fa-chart-line icon" style="color: #10b981;"></i>
+        </div>
+        <div class="kpi">
+          <div class="kpi-content">
             <div class="label">Unique Locations</div>
             <div class="value" id="kpiLocations">—</div>
           </div>
@@ -1188,6 +1195,12 @@
       const totalBookings = viewRows.length;
       const totalRevenue = viewRows.reduce((s, r) => s + (r.totals || 0), 0);
       const avgRevenue = totalBookings ? (totalRevenue / totalBookings) : 0;
+
+      // Average excluding £0 write-offs
+      const paidBookings = viewRows.filter(r => (r.totals || 0) > 0);
+      const paidRevenue = paidBookings.reduce((s, r) => s + r.totals, 0);
+      const avgRevenueExcl = paidBookings.length ? (paidRevenue / paidBookings.length) : 0;
+
       const uniqueLoc = new Set(viewRows.map(r => r.location)).size;
 
       // Payment Type Counts
@@ -1202,6 +1215,7 @@
       document.getElementById("kpiBookings").textContent = fmtInt(totalBookings);
       document.getElementById("kpiRevenue").textContent = "£" + fmtMoney(totalRevenue);
       document.getElementById("kpiARPU").textContent = "£" + fmtMoney(avgRevenue);
+      document.getElementById("kpiARPUExcl").textContent = "£" + fmtMoney(avgRevenueExcl);
       document.getElementById("kpiLocations").textContent = fmtInt(uniqueLoc);
 
       document.getElementById("kpiCorp").textContent = fmtInt(corpCount);
